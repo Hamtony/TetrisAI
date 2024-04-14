@@ -22,6 +22,9 @@ class Figure:
         return self.figures[self.type][self.rotation]
 
     def rotate(self, rot, field, height, width):
+        print(rot, height, width)
+        self.rotation = (self.rotation + rot) % len(self.figures[self.type])
+        return True
         self.temp_field = field
         for i in range(len(self.image())):
             for j in range(len(self.image())):
