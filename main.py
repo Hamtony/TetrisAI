@@ -2,6 +2,7 @@ import pygame
 import random
 from figure import Figure
 colors = [
+    (255, 255, 255),#I
     (98, 255, 245),#I
     (32, 24, 255),#J
     (252, 144, 21),#L
@@ -32,14 +33,13 @@ class Tetris:
     
         self.height = height
         self.width = width
-        self.field = []
         self.score = 0
         self.state = "start"
         
         for i in range(height):
             new_line = []
             for j in range(width):
-                new_line.append(-1)
+                new_line.append(0)
             self.field.append(new_line)
         self.update_queue()
             
@@ -56,6 +56,10 @@ class Tetris:
         if len(self.queue) < 5:
             self.queue.append(self.rand_fig())
             self.update_queue()
+    def prinField(self):
+        print("XDDDDD")
+        for line in self.field:
+            print(line)
 
     def new_figure(self):
         self.figure = Figure(3, 0, self.queue.pop(0))
@@ -64,11 +68,11 @@ class Tetris:
         intersection = False
         for i in range(len(game.figure.image())):
             for j in range(len(game.figure.image())):
-                if self.figure.image()[i][j] == 1:
+                if self.figure.image()[i][j] != 0:
                     if i + self.figure.y > self.height - 1 or \
                             j + self.figure.x > self.width - 1 or \
                             j + self.figure.x < 0 or \
-                            self.field[i + self.figure.y][j + self.figure.x] >= 0:
+                            self.field[i + self.figure.y][j + self.figure.x] > 0:
                         intersection = True
         return intersection
 
@@ -77,7 +81,7 @@ class Tetris:
         for i in range(1, self.height):
             zeros = 0
             for j in range(self.width):
-                if self.field[i][j] == -1:
+                if self.field[i][j] == 0:
                     zeros += 1
             if zeros == 0:
                 lines += 1
@@ -87,6 +91,7 @@ class Tetris:
         self.score += lines ** 2
 
     def go_space(self):
+        self.prinField()
         while not self.intersects():
             self.figure.y += 1
         self.figure.y -= 1
@@ -104,7 +109,7 @@ class Tetris:
     def freeze(self):
         for i in range(len(game.figure.image())):
             for j in range(len(game.figure.image())):
-                if self.figure.image()[i][j]:
+                if self.figure.image()[i][j] != 0:
                     self.field[i + self.figure.y][j + self.figure.x] = self.figure.color
         self.break_lines()
         self.new_figure()
@@ -117,25 +122,17 @@ class Tetris:
         old_x = self.figure.x
         self.figure.x += dx
         if self.intersects():
-            self.figure.x = old_x
-            
-    def search_aviable_rotation(self, new_fig: Figure, old_fig: Figure):
-        old_fig.x
-        old_fig.y
-        nice_rotation = Figure(3, 0, -1)
-        while(nice_rotation.type == -1):
-            
-            new_fig.image()
-            
+            self.figure.x = old_x  
 
     def rotate(self, direction):
         old_rotation = self.figure.rotation
         self.figure.rotate(rot = direction, field = self.field, height = self.height, width = self.width)
+        self.field = self.figure.temp_field
         if self.intersects():
             self.figure.rotation = old_rotation
         else:
             self.no_auto_freeze = 5
-        #self.field = self.figure.temp_field
+        
 
     def hold(self):
         if self.hold_piece.type != -1:
@@ -215,7 +212,7 @@ while not done:
     for i in range(game.height):
         for j in range(game.width):
             pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
-            if game.field[i][j] >= 0:
+            if game.field[i][j] > 0:
                 pygame.draw.rect(screen, colors[game.field[i][j]],
                                  [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
 

@@ -1,7 +1,6 @@
 from pieces import pieces
 import random
 from kickdata import wallkickdata
-from ps import tetrispieces
 
 class Figure:
     x = 0
@@ -13,17 +12,17 @@ class Figure:
         self.x = x
         self.y = y
         self.type = type
-        self.color = type
+        self.color = type+1
         self.rotation = 0
         self.kickdata = wallkickdata()
-        self.ps = tetrispieces()
-        self.ps = self.ps.collated()
+        self.ps = pieces
         self.temp_field = []
 
     def image(self):
         return self.figures[self.type][self.rotation]
 
     def rotate(self, rot, field, height, width):
+        print(field[19])
         self.temp_field = field
         self.removePiece(self.type, self.rotation, self.x, self.y, field=self.temp_field)
         if rot > 0:
@@ -72,7 +71,7 @@ class Figure:
         for ys in range(y, y + l):
             for xs in range(x, x + l2):
                 if p[ys - y][xs - x] != 0:
-                    field[ys][xs] = -1
+                    field[ys][xs] = 0
     
     def place(self, n, r, x, y, field, height, width):
         p = self.ps[n][r]
@@ -82,7 +81,7 @@ class Figure:
             for xs in range(x, x + w):
                 p1 = ys - y
                 p2 = xs - x
-                if p[p1][p2] != 0 and (ys < height and ys >= 0 and xs < width and xs >= 0):
+                if p[p1][p2] != 0 and (ys < height and ys > 0 and xs < width and xs > 0):
                     field[ys][xs] = p[p1][p2]
                     
     def check(self, p, x, y, field, height, width):
@@ -100,3 +99,4 @@ class Figure:
                 else:
                     pass
         return True
+    
