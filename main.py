@@ -66,8 +66,8 @@ class Tetris:
 
     def intersects(self):
         intersection = False
-        for i in range(len(game.figure.image())):
-            for j in range(len(game.figure.image())):
+        for i in range(len(self.figure.image())):
+            for j in range(len(self.figure.image())):
                 if self.figure.image()[i][j] != 0:
                     if i + self.figure.y > self.height - 1 or \
                             j + self.figure.x > self.width - 1 or \
@@ -91,7 +91,6 @@ class Tetris:
         self.score += lines ** 2
 
     def go_space(self):
-        self.prinField()
         while not self.intersects():
             self.figure.y += 1
         self.figure.y -= 1
@@ -127,7 +126,7 @@ class Tetris:
     def rotate(self, direction):
         old_rotation = self.figure.rotation
         self.figure.rotate(rot = direction, field = self.field, height = self.height, width = self.width)
-        self.field = self.figure.temp_field
+        #self.field = self.figure.temp_field
         if self.intersects():
             self.figure.rotation = old_rotation
         else:

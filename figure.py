@@ -22,8 +22,14 @@ class Figure:
         return self.figures[self.type][self.rotation]
 
     def rotate(self, rot, field, height, width):
-        print(field[19])
         self.temp_field = field
+        for i in range(len(self.image())):
+            for j in range(len(self.image())):
+                if self.image()[i][j] != 0:
+                    self.temp_field[i + self.y][j + self.x] = self.color
+        print("XDDDDD")
+        for line in self.temp_field:
+            print(line)
         self.removePiece(self.type, self.rotation, self.x, self.y, field=self.temp_field)
         if rot > 0:
             i = 0
@@ -91,8 +97,8 @@ class Figure:
             for xs in range(x, x + w):
                 p1 = ys - y
                 p2 = xs - x
-                if (p[p1][p2] != 0) and (ys < height and ys >= 0 and xs < width and xs >= 0) and field[ys][
-                    xs] == -1:
+                if (p[p1][p2] != 0) and (ys < height and ys > 0 and xs < width and xs > 0) and field[ys][
+                    xs] == 0:
                     pass
                 elif p[p1][p2] != 0:
                     return False
