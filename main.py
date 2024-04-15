@@ -1,6 +1,7 @@
 import pygame
 import random
 from figure import Figure
+import time
 colors = [
     (255, 255, 255),#I
     (98, 255, 245),#I
@@ -124,13 +125,12 @@ class Tetris:
             self.figure.x = old_x  
 
     def rotate(self, direction):
-        old_rotation = self.figure.rotation
+        #old_rotation = self.figure.rotation
         self.figure.rotate(rot = direction, field = self.field, height = self.height, width = self.width)
-        #self.field = self.figure.temp_field
-        if self.intersects():
-            self.figure.rotation = old_rotation
-        else:
-            self.no_auto_freeze = 5
+        #if self.intersects():
+        #    self.figure.rotation = old_rotation
+        #else:
+        #    self.no_auto_freeze = 5
         
 
     def hold(self):
@@ -169,6 +169,7 @@ counter = 0
 pressing_down = False
 
 while not done:
+    cur = time.time()
     if game.figure is None:
         game.new_figure()
     counter += 1
@@ -178,7 +179,8 @@ while not done:
     if counter % (fps // game.level // 2) == 0 or pressing_down:
         if game.state == "start":
             game.go_down()
-
+    print()
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
@@ -202,7 +204,7 @@ while not done:
             if event.key == pygame.K_c:
                 game.hold()
 
-    if event.type == pygame.KEYUP:
+    if not pygame.K_DOWN in pygame.event.get():
             if event.key == pygame.K_DOWN:
                 pressing_down = False
 
