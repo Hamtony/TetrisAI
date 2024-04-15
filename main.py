@@ -25,11 +25,12 @@ class Tetris:
         self.y = 60
         self.zoom = 20
         self.figure = None
-        self.no_auto_freeze = 5
+        self.no_auto_freeze = 9999999999
         self.limit_no_freeze = 15
         self.hold_piece = Figure(3, 0, -1)
         self.pool = [0,1,2,3,4,5,6]
         self.queue = []
+        self.hold_avaible = True
         
     
         self.height = height
@@ -144,7 +145,21 @@ class Tetris:
             self.new_figure()
             self.update_queue()
         
-
+        
+#keys
+keys = {
+    'up': pygame.K_UP,
+    'down': pygame.K_DOWN,
+    'left': pygame.K_LEFT,
+    'right': pygame.K_RIGHT,
+    'rotatec': pygame.K_z,
+    'rotatecc': pygame.K_x,
+    'rotatec180': pygame.K_a,
+    'hold': pygame.K_c,
+    'pause': pygame.K_ESCAPE,
+    'drop': pygame.K_SPACE,
+    'reset': pygame.K_r
+}
 
 # Initialize the game engine
 pygame.init()
@@ -165,13 +180,13 @@ clock = pygame.time.Clock()
 fps = 25
 game = Tetris(20, 10)
 counter = 0
-
 pressing_down = False
 
 while not done:
     cur = time.time()
     if game.figure is None:
         game.new_figure()
+        
     counter += 1
     if counter > 100000:
         counter = 0
@@ -185,28 +200,28 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_x:
+            if event.key == keys['rotatecc']:
                 game.rotate(1)
-            if event.key == pygame.K_z:
+            if event.key ==  keys['rotatec']:
                 game.rotate(-1)
-            if event.key == pygame.K_a:
+            if event.key == keys['rotatec180']:
                 game.rotate(2)
-            if event.key == pygame.K_DOWN:
+            if event.key == keys['down']:
                 pressing_down = True
-            if event.key == pygame.K_LEFT:
+            else:
+                pressing_down = False
+            if event.key == keys['left']:
                 game.go_side(-1)
-            if event.key == pygame.K_RIGHT:
+            if event.key == keys['right']:
                 game.go_side(1)
-            if event.key == pygame.K_SPACE:
+            if event.key == keys['drop']:
                 game.go_space()
-            if event.key == pygame.K_r:
+            if event.key == keys['reset']:
                 game.__init__(20, 10)
-            if event.key == pygame.K_c:
+            if event.key == keys['hold']:
                 game.hold()
 
-    if not pygame.K_DOWN in pygame.event.get():
-            if event.key == pygame.K_DOWN:
-                pressing_down = False
+
 
     screen.fill(WHITE)
 

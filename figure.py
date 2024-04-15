@@ -30,14 +30,7 @@ class Figure:
         #print(rot, height, width)
         #self.prinPiece()
         #self.rotation = (self.rotation + rot) % len(self.figures[self.type])
-        
         self.temp_field = field
-        """for i in range(len(self.image())):
-            for j in range(len(self.image())):
-                if self.image()[i][j] != 0:
-                    self.temp_field[i + self.y][j + self.x] = self.color"""
-                    
-        self.removePiece(self.type, self.rotation, self.x, self.y)
         if rot > 0:
             i = 0
             index = self.rotation
@@ -48,12 +41,10 @@ class Figure:
         if self.type == 0:
             for kick_elm in self.kickdata.i[index][i]:
                 if self.placePiece(self.type, (self.rotation + rot) % 4, self.x + kick_elm[0], self.y + kick_elm[1], self.temp_field, height, width):
-                    
-                    #self.place(self.type, (self.rotation + rot) % 4, self.x + kick_elm[0], self.y + kick_elm[1], self.temp_field, height, width)
                     self.rotation = (self.rotation + rot) % 4
                     self.x += kick_elm[0]
                     self.y += kick_elm[1]
-                    print("roto I")
+                    print(kick_elm[0], kick_elm[1])
                     return True
                 else:
                     pass
@@ -61,11 +52,10 @@ class Figure:
         else:
             for kick_elm in self.kickdata.therest[index][i]:
                 if self.placePiece(self.type, (self.rotation + rot) % 4, self.x + kick_elm[0], self.y + kick_elm[1], self.temp_field, height, width):
-                    #self.place(self.type, (self.rotation + rot) % 4, self.x + kick_elm[0], self.y + kick_elm[1], self.temp_field, height, width)
                     self.rotation = (self.rotation + rot) % 4
                     self.x += kick_elm[0]
                     self.y += kick_elm[1]
-                    print("roto no I")
+                    print(kick_elm[0], kick_elm[1])
                     return True
                 else:
                     pass
@@ -91,7 +81,7 @@ class Figure:
             for xs in range(x, x + w):
                 p1 = ys - y
                 p2 = xs - x
-                if (p[p1][p2] != 0) and (ys < height and ys > 0 and xs < width and xs > 0) and self.temp_field[ys][xs] == 0:
+                if (p[p1][p2] != 0) and (ys < height and ys >= 0 and xs < width and xs >= 0) and self.temp_field[ys][xs] == 0:
                     pass
                 elif p[p1][p2] != 0:
                     return False
