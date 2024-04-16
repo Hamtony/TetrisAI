@@ -37,14 +37,12 @@ class Figure:
         else:
             i = 1
             index = self.rotation + rot
-        print(index)
         if self.type == 0:
             for kick_elm in self.kickdata.i[index][i]:
                 if self.placePiece(self.type, (self.rotation + rot) % 4, self.x + kick_elm[0], self.y + kick_elm[1], self.temp_field, height, width):
                     self.rotation = (self.rotation + rot) % 4
                     self.x += kick_elm[0]
                     self.y += kick_elm[1]
-                    print(kick_elm[0], kick_elm[1])
                     return True
                 else:
                     pass
@@ -55,7 +53,6 @@ class Figure:
                     self.rotation = (self.rotation + rot) % 4
                     self.x += kick_elm[0]
                     self.y += kick_elm[1]
-                    print(kick_elm[0], kick_elm[1])
                     return True
                 else:
                     pass
