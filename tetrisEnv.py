@@ -4,12 +4,13 @@ import pygame
 import numpy as np
 import random
 from Tetris import Tetris
+
 from gymnasium.envs.registration import register
 from enum import Enum
 
 
 class TetrisEnv(gymnasium.Env):
-    metadata = {"render_mode": ["human","rgb_array"], "render_fps":4}
+    metadata = {"render_modes": ["human","none"], "render_fps":4}
     
     def __init__(self, render_mode=None):
         self.width = 10
@@ -126,16 +127,3 @@ register(
     max_episode_steps=2999,
 )
 
-env = TetrisEnv()
-env.__init__()
-env.action_space.seed()
-
-observation, info = env.reset()
-
-for _ in range(1099900):
-    observation, reward, terminated, truncated, info = env.step(env.action_space.sample())
-
-    if terminated or truncated:
-        observation, info = env.reset()
-
-env.close()
