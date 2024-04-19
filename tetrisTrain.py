@@ -52,9 +52,10 @@ class TetrisDQL():
     
     def train(self, episodes, render = False):
         env = TetrisEnv(render_mode="none")
-        num_states = flatten_space(env.observation_space)
+        
+        num_states = env.unwrapped.observation_space
         print(num_states)
-        num_actions = flatten_space(env.action_space)
+        num_actions = env.unwrapped.action_space
         print(num_actions)
         
         

@@ -25,7 +25,7 @@ GRAY = (128, 128, 128)
 class TetrisEnv(gymnasium.Env):
     metadata = {"render_modes": ["human","none"], "render_fps":4}
     
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode="none"):
         self.width = 10
         self.height = 20
         self.game = Tetris(self.height,self.width)
@@ -177,13 +177,13 @@ register(
     entry_point='tetrisEnv:TetrisEnv',
     max_episode_steps=2999,
 )
-
-env = TetrisEnv(render_mode="human")
+"""
+env = TetrisEnv()
 obs = env.reset()[0]
 
 for i in range(9999999):
     rand_action = env.action_space.sample()
     obs, reward, terminated, _, _ = env.step(rand_action)
-    print(env.render_mode)
     if terminated:
         env.reset()
+"""
