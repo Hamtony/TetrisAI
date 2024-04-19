@@ -8,6 +8,19 @@ from Tetris import Tetris
 from gymnasium.envs.registration import register
 from enum import Enum
 
+colors = [
+    (255, 255, 255),#I
+    (98, 255, 245),#I
+    (32, 24, 255),#J
+    (252, 144, 21),#L
+    (42, 245, 83),#S
+    (255, 0, 0),#Z
+    (255, 24, 247),#T
+    (255, 208, 2),#O
+]   
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
 
 class TetrisEnv(gymnasium.Env):
     metadata = {"render_modes": ["human","none"], "render_fps":4}
@@ -42,8 +55,17 @@ class TetrisEnv(gymnasium.Env):
         }
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
-        self.window = None
-        self.clock = None
+        if self.render_mode == "human":
+            
+            pygame.init()
+            self.size = (400, 500)
+            self.screen = pygame.display.set_mode(self.size)
+            pygame.display.set_caption("Tetris")
+            self.clock = pygame.time.Clock()
+            self.fps = 60
+            self.window = "active"
+        else:
+            self.window = "none"
         
     def _get_info(self):
         return {"score": self.game.score}
@@ -67,8 +89,8 @@ class TetrisEnv(gymnasium.Env):
         observation = self._get_obs()
         info = self._get_info()
 
-        #if self.render_mode == "human":
-        #    self._render_frame()
+        if self.render_mode == "human":
+            self.render()
 
         return observation, info
     
@@ -106,18 +128,47 @@ class TetrisEnv(gymnasium.Env):
         info = self._get_info()
 
         if self.render_mode == "human":
-            pass
-            #self._render_frame()
+            self.render()
 
         return observation, reward, terminated, False, info
     
     def close(self):
-        if self.window is not None:
+        if self.window != "none":
             pygame.display.quit()
             pygame.quit()
             
     def render(self, mode = "human"):
-        pass
+        self.screen.fill(WHITE)
+        for i in range(self.game.height):
+            for j in range(self.game.width):
+                pygame.draw.rect(self.screen, GRAY, [self.game.x + self.game.zoom * j, self.game.y + self.game.zoom * i, self.game.zoom, self.game.zoom], 1)
+                if self.game.field[i][j] > 0:
+                    pygame.draw.rect(self.screen, colors[self.game.field[i][j]],
+                                    [self.game.x + self.game.zoom * j + 1, self.game.y + self.game.zoom * i + 1, self.game.zoom - 2, self.game.zoom - 1])
+
+        if self.game.figure is not None:
+            for i in range(len(self.game.figure.image())):
+                for j in range(len(self.game.figure.image())):
+                    if self.game.figure.image()[i][j]:
+                        pygame.draw.rect(self.screen, colors[self.game.figure.color],
+                                        [self.game.x + self.game.zoom * (j + self.game.figure.x) + 1,
+                                        self.game.y + self.game.zoom * (i + self.game.figure.y) + 1,
+                                        self.game.zoom - 2, self.game.zoom - 2])
+
+        font = pygame.font.SysFont('Calibri', 25, True, False)
+        font1 = pygame.font.SysFont('Calibri', 65, True, False)
+        text = font.render("Score: " + str(self.game.score), True, BLACK)
+        text_game_over = font1.render("Game Over", True, (255, 125, 0))
+        text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
+
+        self.screen.blit(text, [0, 0])
+        if self.game.state == "gameover":
+            self.screen.blit(text_game_over, [20, 200])
+            self.screen.blit(text_game_over1, [25, 265])
+
+        pygame.display.flip()
+        self.clock.tick(self.fps)
+        
     def seed(self, seed = None):
         pass
     
@@ -127,3 +178,12 @@ register(
     max_episode_steps=2999,
 )
 
+env = TetrisEnv(render_mode="human")
+obs = env.reset()[0]
+
+for i in range(9999999):
+    rand_action = env.action_space.sample()
+    obs, reward, terminated, _, _ = env.step(rand_action)
+    print(env.render_mode)
+    if terminated:
+        env.reset()
