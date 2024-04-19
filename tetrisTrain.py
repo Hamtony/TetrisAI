@@ -53,7 +53,10 @@ class TetrisDQL():
     def train(self, episodes, render = False):
         env = TetrisEnv(render_mode="none")
         num_states = flatten_space(env.observation_space)
+        print(num_states)
         num_actions = flatten_space(env.action_space)
+        print(num_actions)
+        
         
         epsilon = 1 # 1 = 100% random actions
         memory = ReplayMemory(self.replay_memory_size)
