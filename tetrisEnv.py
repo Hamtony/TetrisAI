@@ -22,12 +22,25 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 
+def dict_to_int_list(observation_space:dict):
+    int_list = []
+    for key, value in observation_space.items():
+        if isinstance(value, int):
+            int_list.append((value))
+        elif isinstance(value, list):
+            if isinstance(value[0], int):
+                int_list.extend((value))
+            elif isinstance(value[0], list):
+                for other_list in value:
+                    int_list.extend(other_list)
+    return int_list
+
 class TetrisEnv(gymnasium.Env):
     metadata = {"render_modes": ["human","none"], "render_fps":4}
     
-    def __init__(self, render_mode="none"):
-        self.width = 10
-        self.height = 20
+    def __init__(self, height=20, width=10, render_mode="none"):
+        self.width = width
+        self.height = height
         self.game = Tetris(self.height,self.width)
         self.actualscore = self.game.score
         self.observation_space = spaces.Dict(
@@ -80,6 +93,17 @@ class TetrisEnv(gymnasium.Env):
                 "hold":self.game.hold_piece.type,
                 "queue":self.game.queue
             }
+        
+    def get_state(self):
+        return dict_to_int_list({
+                "x_piece":self.game.figure.x,
+                "y_piece":self.game.figure.y,
+                "piece_type":self.game.figure.type,
+                "piece_rotation":self.game.figure.rotation,
+                "field":self.game.get_simplified_field(),
+                "hold":self.game.hold_piece.type,
+                "queue":self.game.queue
+            })
     
     def reset(self, seed=random.randint(0,99999), options=None):
         super().reset(seed=seed)

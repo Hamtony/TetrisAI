@@ -5,21 +5,9 @@ from collections import deque
 import random
 import torch
 from torch import nn
-import torch.nn.functional as F
 from tetrisEnv import TetrisEnv
-
-
+import torch.nn.functional as F
 def to_tensor(observation: gym.spaces.Dict) -> torch.Tensor:
-    """
-    Convierte un diccionario de gymnasium a un tensor de pytorch.
-
-    Args:
-        observation (gym.spaces.Dict): Diccionario de observaciones del entorno.
-
-    Returns:
-        torch.Tensor: Tensor de pytorch con las observaciones.
-    """
-
     tensor = torch.zeros([len(observation.keys()), 1])
     i = 0
     for key, value in observation.items():
@@ -31,9 +19,15 @@ def to_tensor(observation: gym.spaces.Dict) -> torch.Tensor:
             raise ValueError(f"Tipo de espacio no compatible: {type(value)}")
         i += 1
     return tensor
-    
-    
 
+def dict_to_int_list(observation_space:gym.spaces.Dict):
+    int_list = []
+    for key, value in observation_space.items():
+        if isinstance(value,gym.spaces.Box):
+            int_list.append(int(np.prod(value.shape)))
+        elif isinstance(value, gym.spaces.Discrete):
+            int_list.append(int(value.n))
+    return int_list
 # Define model
 class DQN(nn.Module):
     def __init__(self, in_states, h1_nodes, out_actions):
@@ -82,11 +76,12 @@ class MountainCarDQL():
     def train(self, episodes, render=False):
         # Create FrozenLake instance
         env = TetrisEnv()
-        num_states = to_tensor(env.observation_space) # expecting 2: position & velocity
+        num_states = torch.tensor(dict_to_int_list(env.observation_space.sample()))
         num_actions = env.action_space.n
+        print(dict_to_int_list(env.observation_space))
 
         # Divide position and velocity into segments
-        self.pos_space = np.linspace(env.observation_space.low[0], env.observation_space.high[0], self.num_divisions)    # Between -1.2 and 0.6
+        self.pos_space = np.linspace(env.observation_space.shape, env.observation_space.high[0], self.num_divisions)    # Between -1.2 and 0.6
         self.vel_space = np.linspace(env.observation_space.low[1], env.observation_space.high[1], self.num_divisions)    # Between -0.07 and 0.07
     
         epsilon = 1 # 1 = 100% random actions
@@ -161,7 +156,7 @@ class MountainCarDQL():
                 best_rewards = rewards
                 print(f'Best rewards so far: {best_rewards}')
                 # Save policy
-                torch.save(policy_dqn.state_dict(), f"tetri_dql_{i}.pt")
+                torch.save(policy_dqn.state_dict(), f"tetris_dql_{i}.pt")
 
             # Check if enough experience has been collected
             if len(memory)>self.mini_batch_size and goal_reached:
@@ -196,7 +191,7 @@ class MountainCarDQL():
         plt.plot(epsilon_history)
         
         # Save plots
-        plt.savefig('tetri.png')
+        plt.savefig('tetris_dql.png')
     # Optimize policy network
     def optimize(self, mini_batch, policy_dqn, target_dqn):
 
@@ -234,12 +229,6 @@ class MountainCarDQL():
         loss.backward()
         self.optimizer.step()
 
-    '''
-    Converts a state (position, velocity) to tensor representation.
-    Example:
-    Input = (0.3, -0.03)
-    Return = tensor([16, 6])
-    '''
     def state_to_dqn_input(self, state)->torch.Tensor:
         state_p = np.digitize(state[0], self.pos_space)
         state_v = np.digitize(state[1], self.vel_space)
@@ -250,7 +239,7 @@ class MountainCarDQL():
     def test(self, episodes, model_filepath):
         # Create FrozenLake instance
         env = TetrisEnv()
-        num_states = torch.tensor(env._get_obs(), dtype=torch.float)
+        num_states = torch.tensor(dict_to_int_list(env.observation_space.sample()))
         num_actions = env.action_space.n
 
         self.pos_space = np.linspace(env.observation_space.low[0], env.observation_space.high[0], self.num_divisions)    # Between -1.2 and 0.6
@@ -281,4 +270,4 @@ if __name__ == '__main__':
 
     mountaincar = MountainCarDQL()
     mountaincar.train(20000, False)
-    mountaincar.test(10, "tetri_dql_17000.pt")
+    mountaincar.test(10, "tetris_dql_17000.pt")

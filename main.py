@@ -91,8 +91,6 @@ while not done:
             if event.key == keys['hold']:
                 game.hold()
 
-
-
     screen.fill(WHITE)
 
     for i in range(game.height):
