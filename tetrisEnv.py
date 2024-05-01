@@ -6,7 +6,6 @@ import random
 from Tetris import Tetris
 
 from gymnasium.envs.registration import register
-from enum import Enum
 
 colors = [
     (255, 255, 255),#I
@@ -118,42 +117,55 @@ class TetrisEnv(gymnasium.Env):
 
         return observation, info
     
-    def step(self, action):
+    def step(self, action:list):
          #ACTIONS = ['Down','Left','Right','Rotatec','Rotatecc', 'Rotate180', 'hold', 'drop' ]
-
-        if self._action_to_direction[action] == 'Down':
+        idx_action = action.index(1)
+        if self._action_to_direction[idx_action] == 'Down':
             self.game.go_down()
-        elif self._action_to_direction[action] == 'Left':
+        elif self._action_to_direction[idx_action] == 'Left':
             self.game.go_side(-1)
-        elif self._action_to_direction[action] == 'Right':
+        elif self._action_to_direction[idx_action] == 'Right':
             self.game.go_side(1)
-        elif self._action_to_direction[action] == 'Rotatec':
+        elif self._action_to_direction[idx_action] == 'Rotatec':
             self.game.rotate(-1)
-        elif self._action_to_direction[action] == 'Rotatecc':
+        elif self._action_to_direction[idx_action] == 'Rotatecc':
             self.game.rotate(1)
-        elif self._action_to_direction[action] == 'Rotate180':
+        elif self._action_to_direction[idx_action] == 'Rotate180':
             self.game.rotate(2)
-        elif self._action_to_direction[action] == 'hold':
+        elif self._action_to_direction[idx_action] == 'hold':
             self.game.hold()
-        elif self._action_to_direction[action] == 'drop':
+        elif self._action_to_direction[idx_action] == 'drop':
             self.game.drop()
             
 
         terminated = self.game.state == "gameover"
         
+
+
+            
+
+
+        
+        #score / reward
+        
         if self.game.score > self.actualscore:
             reward = self.game.score - self.actualscore
-            print(reward)
         else:
             reward = 0
-
+        if terminated:
+            self.game.score-=12
+        if self._action_to_direction[idx_action] == 'drop':
+            self.game.score+=1
+        
+        #get new state
         observation = self._get_obs()
         
         info = self._get_info()
-
+        
+        #render
         if self.render_mode == "human":
             self.render()
-
+        
         return observation, reward, terminated, False, info
     
     def close(self):

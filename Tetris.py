@@ -108,13 +108,15 @@ class Tetris:
         if lines == 4:
             gained_score =  4
         if lines == 3:
-            gained_score = 2
+            gained_score = 3
         if lines == 2:
+            gained_score = 2
+        if lines == 1:
             gained_score = 1
         if self.all_clear():
             gained_score = gained_score + 10
         self.score = self.score+gained_score
-        return gained_score
+        return gained_score*5
             
         
             
@@ -146,7 +148,8 @@ class Tetris:
         if self.intersects():
             self.figure.y -= 1
             if self.no_auto_freeze < 0 and self.no_auto_freeze < 0: 
-                self.freeze()
+                pass
+                #self.freeze()
             else:
                 self.limit_no_freeze = self.limit_no_freeze -1
                 self.no_auto_freeze = self.no_auto_freeze - 1
@@ -166,6 +169,7 @@ class Tetris:
         self.no_auto_freeze = 5
         self.limit_no_freeze = 20
         self.update_queue()
+        self.hold_avaible = True
 
     def go_side(self, dx):
         old_x = self.figure.x
@@ -183,11 +187,13 @@ class Tetris:
         
 
     def hold(self):
-        if self.hold_piece.type != -1:
-            aux = self.hold_piece
-            self.hold_piece = Figure(3, 0, self.figure.type)
-            self.figure = aux
-        else:
-            self.hold_piece = Figure(3, 0, self.figure.type)
-            self.new_figure()
-            self.update_queue()
+        if self.hold_avaible:
+            if self.hold_piece.type != -1:
+                aux = self.hold_piece
+                self.hold_piece = Figure(3, 0, self.figure.type)
+                self.figure = aux
+            else:
+                self.hold_piece = Figure(3, 0, self.figure.type)
+                self.new_figure()
+                self.update_queue()
+            self.hold_avaible = False
