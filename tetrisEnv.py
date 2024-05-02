@@ -73,8 +73,6 @@ class TetrisEnv(gymnasium.Env):
             self.size = (400, 500)
             self.screen = pygame.display.set_mode(self.size)
             pygame.display.set_caption("Tetris")
-            self.clock = pygame.time.Clock()
-            self.fps = 60
             self.window = "active"
         else:
             self.window = "none"
@@ -108,6 +106,10 @@ class TetrisEnv(gymnasium.Env):
         super().reset(seed=seed)
 
         self.game.__init__(self.height, self.width)
+        if self.render_mode == "human":
+            self.size = (400, 500)
+            self.screen = pygame.display.set_mode(self.size)
+            self.window = "active"
 
         observation = self._get_obs()
         info = self._get_info()
@@ -140,12 +142,6 @@ class TetrisEnv(gymnasium.Env):
 
         terminated = self.game.state == "gameover"
         
-
-
-            
-
-
-        
         #score / reward
         
         if self.game.score > self.actualscore:
@@ -154,8 +150,6 @@ class TetrisEnv(gymnasium.Env):
             reward = 0
         if terminated:
             self.game.score-=12
-        if self._action_to_direction[idx_action] == 'drop':
-            self.game.score+=1
         
         #get new state
         observation = self._get_obs()
@@ -203,7 +197,6 @@ class TetrisEnv(gymnasium.Env):
             self.screen.blit(text_game_over1, [25, 265])
 
         pygame.display.flip()
-        self.clock.tick(self.fps)
         
     def seed(self, seed = None):
         pass

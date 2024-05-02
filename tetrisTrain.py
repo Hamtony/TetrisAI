@@ -9,7 +9,7 @@ import random
 from tetrisEnv import TetrisEnv, dict_to_int_list
 from collections import deque
 from helper import plot
-from model import Linear_QNet, QTrainer
+from model import Linear_QNet, QTrainer, cuda
 
 MAX_MEMORY = 100000
 BATCH_SIZE = 1000
@@ -21,7 +21,7 @@ class Agent:
         self.epsilon = 0 #randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) #popleft
-        self.model = Linear_QNet(210,300,8)
+        self.model = Linear_QNet(210,400,8)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     
     def get_state(self, game: TetrisEnv):
@@ -46,13 +46,13 @@ class Agent:
     def get_action(self, state):
         #random moves: exploration
         
-        self.epsilon = 50000 - self.n_games
+        self.epsilon = 500 - self.n_games
         final_move = [0,0,0,0,0,0,0,0]
         if random.randint(0,100000) < self.epsilon:
             move = random.randint(0,7)
             final_move[move]=1
         else:
-            state0 = torch.tensor(state, dtype=torch.float)
+            state0 = torch.tensor(state, dtype=torch.float, device=cuda)
             prediction = self.model(state0)
             move = torch.argmax(prediction).item()
             final_move[move] = 1
@@ -64,7 +64,7 @@ def train():
     total_score = 0
     record = 0
     agent = Agent()
-    game = TetrisEnv()
+    game = TetrisEnv(render_mode="human")
     while(True):
         #get old state
         state_old = agent.get_state(game)
