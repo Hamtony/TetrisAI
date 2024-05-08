@@ -41,6 +41,7 @@ class TetrisEnv(gymnasium.Env):
         self.width = width
         self.height = height
         self.game = Tetris(self.height,self.width)
+        self.moves_without_drop = 0
         self.actualscore = self.game.score
         self.observation_space = spaces.Dict(
             {
@@ -138,19 +139,35 @@ class TetrisEnv(gymnasium.Env):
             self.game.hold()
         elif self._action_to_direction[idx_action] == 'drop':
             self.game.drop()
+            self.moves_without_drop =0
+            
             
 
         terminated = self.game.state == "gameover"
+        if terminated:
+            self.moves_without_drop =0
         
+        #autodrop
+        if self._action_to_direction[idx_action] != 'drop':
+            self.moves_without_drop += 1
+        if self.moves_without_drop >= 30:
+            self.game.drop()
+            self.moves_without_drop =0
         #score / reward
-        
-        if self.game.score > self.actualscore:
+            
+        if self._action_to_direction[idx_action] == 'drop':
+            if self.game.field[5] == [0,0,0,0,0,0,0,0,0,0]:
+                self.game.score+=1
+            else: 
+                self.game.score -=2
+
+        if self.game.score != self.actualscore:
             reward = self.game.score - self.actualscore
+            self.actualscore=self.game.score
         else:
             reward = 0
-        if terminated:
-            self.game.score-=12
-        
+            
+            
         #get new state
         observation = self._get_obs()
         

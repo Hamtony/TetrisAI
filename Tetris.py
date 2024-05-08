@@ -45,6 +45,11 @@ class Tetris:
                 else:
                     new_line.append(0)
             f.append(new_line)
+        for i in range(len(self.figure.image())):
+            for j in range(len(self.figure.image())):
+                if self.figure.image()[i][j] != 0:
+                    f[i + self.figure.y][j + self.figure.x] = 2
+            
         return f
 
     def rand_fig(self):
@@ -116,7 +121,7 @@ class Tetris:
         if self.all_clear():
             gained_score = gained_score + 10
         self.score = self.score+gained_score
-        return gained_score*5
+        return gained_score*10
             
         
             

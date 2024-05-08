@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+import numpy as np
 cuda = torch.device('cuda')
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -16,7 +17,7 @@ class Linear_QNet(nn.Module):
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
         x = F.relu(self.linear3(x))
-        x = F.relu(self.linear4(x))
+        x = self.linear4(x)
         return x
     
     def save(self, file_name='model.pth'):
@@ -35,10 +36,10 @@ class QTrainer:
         self.criterion = nn.MSELoss()
         
     def train_step(self, state ,action, reward, next_state, done):
-        state = torch.tensor(state, dtype=torch.float,device=cuda)
-        next_state = torch.tensor(next_state, dtype=torch.float,device=cuda)
-        action = torch.tensor(action, dtype=torch.long,device=cuda)
-        reward = torch.tensor(reward, dtype=torch.float,device=cuda)
+        state = torch.tensor(np.array(state), dtype=torch.float,device=cuda)
+        next_state = torch.tensor(np.array(next_state), dtype=torch.float,device=cuda)
+        action = torch.tensor(np.array(action), dtype=torch.long,device=cuda)
+        reward = torch.tensor(np.array(reward), dtype=torch.float,device=cuda)
         
         if len(state.shape) == 1:
             state = torch.unsqueeze(state, 0)

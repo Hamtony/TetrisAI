@@ -19,7 +19,7 @@ class Agent:
     def __init__(self):
         self.n_games = 1
         self.epsilon = 6000 #randomness
-        self.gamma = 0.90 # discount rate
+        self.gamma = 0.96 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) #popleft
         self.model = Linear_QNet(210,400,8)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -97,7 +97,7 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             if agent.n_games == 7500:
-                title = "gamma_" + str(agent.gamma) + " LR_" + str(LR)    
+                title = "gamma_" + str(agent.gamma) + " LR_" + str(LR)                
                 plot(plot_scores,plot_mean_scores,title)
         
         
