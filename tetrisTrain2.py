@@ -18,10 +18,10 @@ LR = 0.001
 class Agent:
     def __init__(self):
         self.n_games = 1
-        self.epsilon = 6000 #randomness
-        self.gamma = 0.10 # discount rate
+        self.epsilon = 60000 #randomness
+        self.gamma = 0.90 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) #popleft
-        self.model = Linear_QNet(210,400,8)
+        self.model = Linear_QNet(210,80,8)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     
     def get_state(self, game: TetrisEnv):
@@ -46,9 +46,9 @@ class Agent:
     def get_action(self, state):
         #random moves: exploration
         if self.epsilon > 0:
-            self.epsilon = 6000 - self.n_games
+            self.epsilon = 60000 - self.n_games
         final_move = [0,0,0,0,0,0,0,0]
-        if random.randint(0,10000) < self.epsilon:
+        if random.randint(0,100000) < self.epsilon:
             move = random.randint(0,7)
             final_move[move]=1
         else:
@@ -64,7 +64,7 @@ def train():
     total_score = 0
     record = 0
     agent = Agent()
-    game = TetrisEnv(render_mode="human")
+    game = TetrisEnv()
     while(True):
         #get old state
         state_old = agent.get_state(game)
@@ -96,9 +96,11 @@ def train():
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            if agent.n_games == 7500:
-                title = "gamma_" + str(agent.gamma) + " LR_" + str(LR)                
-                plot(plot_scores,plot_mean_scores,title)
+            if agent.n_games % 5 == 0:
+                try:
+                    title = "gamma_" + str(agent.gamma) + " LR_" + str(LR)    
+                    plot(plot_scores,plot_mean_scores,title)
+                except: pass
         
         
 

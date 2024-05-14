@@ -138,14 +138,14 @@ class TetrisEnv(gymnasium.Env):
         elif self._action_to_direction[idx_action] == 'hold':
             self.game.hold()
         elif self._action_to_direction[idx_action] == 'drop':
-            self.game.drop()
-            self.moves_without_drop =0
+            drop_height = self.game.drop()
             
             
 
         terminated = self.game.state == "gameover"
         if terminated:
             self.moves_without_drop =0
+            self.game.score -= 30
         
         #autodrop
         if self._action_to_direction[idx_action] != 'drop':
@@ -156,10 +156,7 @@ class TetrisEnv(gymnasium.Env):
         #score / reward
             
         if self._action_to_direction[idx_action] == 'drop':
-            if self.game.field[5] == [0,0,0,0,0,0,0,0,0,0]:
-                self.game.score+=1
-            else: 
-                self.game.score -=2
+            self.game.score += (drop_height) - 6
 
         if self.game.score != self.actualscore:
             reward = self.game.score - self.actualscore

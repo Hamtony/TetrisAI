@@ -121,7 +121,7 @@ class Tetris:
         if self.all_clear():
             gained_score = gained_score + 10
         self.score = self.score+gained_score
-        return gained_score*10
+        return gained_score*20
             
         
             
@@ -146,7 +146,9 @@ class Tetris:
         while not self.intersects():
             self.figure.y += 1
         self.figure.y -= 1
+        drop_height = self.figure.y
         self.freeze()
+        return drop_height
 
     def go_down(self):
         self.figure.y += 1
