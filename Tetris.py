@@ -139,6 +139,7 @@ class Tetris:
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
         if lines > 0:
+            print("SE ROMPIO UNA LINEA ALFIN!!!!!!!!!!")
             self.calculate_score(lines, t_field)
             self.just_rotate = False
 
