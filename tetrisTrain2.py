@@ -11,15 +11,15 @@ from collections import deque
 from helper import plot
 from model import Linear_QNet, QTrainer, cuda
 
-MAX_MEMORY = 100000
-BATCH_SIZE = 1000
+MAX_MEMORY = 1000000
+BATCH_SIZE = 10000
 LR = 0.001
 
 class Agent:
     def __init__(self):
         self.n_games = 1
-        self.epsilon = 60000 #randomness
-        self.gamma = 0.90 # discount rate
+        self.epsilon = 6000 #randomness
+        self.gamma = 0.55 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) #popleft
         self.model = Linear_QNet(210,80,8)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -46,9 +46,9 @@ class Agent:
     def get_action(self, state):
         #random moves: exploration
         if self.epsilon > 0:
-            self.epsilon = 60000 - self.n_games
+            self.epsilon = 6000 - self.n_games
         final_move = [0,0,0,0,0,0,0,0]
-        if random.randint(0,100000) < self.epsilon:
+        if random.randint(0,10000) < self.epsilon:
             move = random.randint(0,7)
             final_move[move]=1
         else:
