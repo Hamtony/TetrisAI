@@ -2,6 +2,7 @@ from Tetris import Tetris
 from tetrisEnv import TetrisEnv
 import pygame
 from pieces import pieces
+from tetrisTrain import Agent
 colors = [
     (255, 255, 255),#I
     (98, 255, 245),#I
@@ -34,6 +35,9 @@ class Versus():
         self.gamePlayer = Tetris(20,10)
         self.counter = 0
         self.tetrisAgent = TetrisEnv()
+        self.agent = Agent()
+        self.agent.epsilon = 0
+        self.agent.min_epsilon = 0
         pygame.init()
         self.size = (400+400, 500)
         self.screen = pygame.display.set_mode(self.size)
@@ -135,8 +139,9 @@ class Versus():
         
     def agent_play(self):
         if(self.actual_bot_delay >= self.bot_delay):
-            rand_action = self.tetrisAgent.action_space.sample()
-            obs, reward, terminated, _, _ = self.tetrisAgent.step(rand_action)
+            state_old = self.agent.get_state(self.tetrisAgent)
+            final_move = self.agent.get_action(state_old)
+            obs, reward, terminated, _, _ = self.tetrisAgent.step(final_move)
             self.actual_bot_delay = 0
         else:
             self.actual_bot_delay += 1

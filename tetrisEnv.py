@@ -89,7 +89,12 @@ class TetrisEnv(gymnasium.Env):
                 "piece_rotation":self.game.figure.rotation,
                 "field":self.game.get_simplified_field(),
                 "hold":self.game.hold_piece.type,
-                "queue":self.game.queue
+                "queue":self.game.queue,
+                "lines_cleared":self.game.cleared_lines,
+                "total_score": self.game.score,
+                "holes": self.game.holes(),
+                "total_height": self.game.total_height(),
+                "bumpiness":self.game.bumpiness()
             }
         
     def get_state(self):
@@ -100,7 +105,12 @@ class TetrisEnv(gymnasium.Env):
                 "piece_rotation":self.game.figure.rotation,
                 "field":self.game.get_simplified_field(),
                 "hold":self.game.hold_piece.type,
-                "queue":self.game.queue
+                "queue":self.game.queue,
+                "lines_cleared":self.game.cleared_lines,
+                "total_score": self.game.score,
+                "holes": self.game.holes(),
+                "total_height": self.game.total_height(),
+                "bumpiness":self.game.bumpiness()
             })
     
     def reset(self, seed=random.randint(0,99999), options=None):
@@ -152,6 +162,7 @@ class TetrisEnv(gymnasium.Env):
             self.moves_without_drop += 1
         if self.moves_without_drop >= 30:
             self.game.drop()
+            self.game.score-=1
             self.moves_without_drop =0
         #score / reward
             

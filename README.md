@@ -1,0 +1,1 @@
+pip install torch numpy gymnasium pygame matplotlib ipython

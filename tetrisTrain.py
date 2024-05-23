@@ -13,15 +13,16 @@ from model import Linear_QNet, QTrainer, cuda
 
 MAX_MEMORY = 100000
 BATCH_SIZE = 1000
-LR = 0.001
+LR = 0.0001
 
 class Agent:
     def __init__(self):
         self.n_games = 1
-        self.epsilon = 60000 #randomness
-        self.gamma = 0.25 # discount rate
+        self.epsilon = 0 #randomness (0-10000)
+        self.min_epsilon = 1000 #min value of randomness
+        self.gamma = 0.55 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) #popleft
-        self.model = Linear_QNet(210,80,8)
+        self.model = Linear_QNet(215,215,8)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     
     def get_state(self, game: TetrisEnv):
@@ -45,10 +46,11 @@ class Agent:
     
     def get_action(self, state):
         #random moves: exploration
-        if self.epsilon > 0:
-            self.epsilon = 60000 - self.n_games
+        ep = self.epsilon - self.n_games
+        if ep < self.min_epsilon:
+            ep = self.min_epsilon
         final_move = [0,0,0,0,0,0,0,0]
-        if random.randint(0,100000) < self.epsilon:
+        if random.randint(0,100000) < ep:
             move = random.randint(0,7)
             final_move[move]=1
         else:

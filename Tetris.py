@@ -21,6 +21,7 @@ class Tetris:
         self.queue = []
         self.hold_avaible = True
         self. just_rotate = False
+        self.cleared_lines = 0
     
         self.height = height
         self.width = width
@@ -123,8 +124,6 @@ class Tetris:
         self.score = self.score+gained_score
         return gained_score*20
             
-        
-            
             
     def break_lines(self, t_field):
         lines = 0
@@ -139,6 +138,8 @@ class Tetris:
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
         if lines > 0:
+            print("SE ROMPIO UNA LINEA :DDDD")
+            self.cleared_lines += lines
             self.calculate_score(lines, t_field)
             self.just_rotate = False
 
@@ -190,8 +191,6 @@ class Tetris:
         if self.figure.rotate(rot = direction, field = self.field, height = self.height, width = self.width):
             self.no_auto_freeze = 5
             self.just_rotate = True
-        
-        
 
     def hold(self):
         if self.hold_avaible:
@@ -204,3 +203,45 @@ class Tetris:
                 self.new_figure()
                 self.update_queue()
             self.hold_avaible = False
+            
+    def holes(self):
+        holes = 0
+        
+        for col in range(self.width):
+            found_piece = False
+            for fila in range(self.height):
+                if self.field[fila][col] == 1:
+                    found_piece = True
+                elif found_piece and self.field[fila][col] == 0:
+                    holes += 1
+        return holes
+    
+    def total_height(self):
+        sum_height = 0
+
+        for col in range(self.width):
+            i = 0
+            while i < self.height and self.field[i][col] == 0:
+                i += 1
+            height = self.height - i
+            sum_height += height
+
+        return sum_height
+    
+    def bumpiness(self):
+        total_bumpiness = 0
+        max_bumpiness = 0
+        min_ys = []
+
+        for col in range(self.width):
+            i = 0
+            while i < self.height and self.field[i][col] == 0:
+                i += 1
+            min_ys.append(i)
+        
+        for i in range(len(min_ys) - 1):
+            bumpiness = abs(min_ys[i] - min_ys[i+1])
+            max_bumpiness = max(bumpiness, max_bumpiness)
+            total_bumpiness += abs(min_ys[i] - min_ys[i+1])
+
+        return total_bumpiness
