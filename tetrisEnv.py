@@ -82,12 +82,11 @@ class TetrisEnv(gymnasium.Env):
         return {"score": self.game.score}
     
     def _get_obs(self):
-        return {
+        obs = {
                 "x_piece":self.game.figure.x,
                 "y_piece":self.game.figure.y,
                 "piece_type":self.game.figure.type,
                 "piece_rotation":self.game.figure.rotation,
-                "field":self.game.get_simplified_field(),
                 "hold":self.game.hold_piece.type,
                 "queue":self.game.queue,
                 "lines_cleared":self.game.cleared_lines,
@@ -96,22 +95,16 @@ class TetrisEnv(gymnasium.Env):
                 "total_height": self.game.total_height(),
                 "bumpiness":self.game.bumpiness()
             }
-        
-    def get_state(self):
-        return dict_to_int_list({
-                "x_piece":self.game.figure.x,
-                "y_piece":self.game.figure.y,
-                "piece_type":self.game.figure.type,
-                "piece_rotation":self.game.figure.rotation,
-                "field":self.game.get_simplified_field(),
-                "hold":self.game.hold_piece.type,
-                "queue":self.game.queue,
-                "lines_cleared":self.game.cleared_lines,
-                "total_score": self.game.score,
-                "holes": self.game.holes(),
-                "total_height": self.game.total_height(),
-                "bumpiness":self.game.bumpiness()
-            })
+        state = {"field":self.game.get_simplified_field()}
+        other_state = []
+        for key, value in obs.items():
+            if key == 'queue':
+                other_state.extend([x for x in value])
+            else:    
+                other_state.append(value)
+        state['other_state'] = other_state
+        return state
+            
     
     def reset(self, seed=random.randint(0,99999), options=None):
         super().reset(seed=seed)
@@ -130,9 +123,8 @@ class TetrisEnv(gymnasium.Env):
 
         return observation, info
     
-    def step(self, action:list):
+    def step(self, idx_action):
          #ACTIONS = ['Down','Left','Right','Rotatec','Rotatecc', 'Rotate180', 'hold', 'drop' ]
-        idx_action = action.index(1)
         if self._action_to_direction[idx_action] == 'Down':
             self.game.go_down()
         elif self._action_to_direction[idx_action] == 'Left':
@@ -164,17 +156,21 @@ class TetrisEnv(gymnasium.Env):
             self.game.drop()
             self.game.score-=1
             self.moves_without_drop =0
+            
         #score / reward
             
         if self._action_to_direction[idx_action] == 'drop':
             self.game.score += (drop_height) - 6
+            
+        if self.game.score > 5000:
+            self.game.score +=500
+            terminated = True
 
         if self.game.score != self.actualscore:
             reward = self.game.score - self.actualscore
             self.actualscore=self.game.score
         else:
             reward = 0
-            
             
         #get new state
         observation = self._get_obs()

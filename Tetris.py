@@ -17,7 +17,7 @@ class Tetris:
         self.no_auto_freeze = 9999999999
         self.limit_no_freeze = 20
         self.hold_piece = Figure(3, 0, -1)
-        self.pool = [0,1,2,3,4,5,6]
+        self.pool = [6,0]
         self.queue = []
         self.hold_avaible = True
         self. just_rotate = False
@@ -55,7 +55,7 @@ class Tetris:
 
     def rand_fig(self):
         if len(self.pool) == 0:
-            self.pool = [0,1,2,3,4,5,6]
+            self.pool = [6,0]
         piece_index = random.randint(0,len(self.pool)-1)
         piece = self.pool[piece_index]
         self.pool.remove(piece)
@@ -72,6 +72,8 @@ class Tetris:
 
     def new_figure(self):
         self.figure = Figure(3, 0, self.queue.pop(0))
+        #self.figure = Figure(3, 0, 6)
+        
 
     def intersects(self):
         intersection = False
@@ -121,8 +123,11 @@ class Tetris:
             gained_score = 1
         if self.all_clear():
             gained_score = gained_score + 10
-        self.score = self.score+gained_score
-        return gained_score*20
+        gained_score *= 50
+        self.score += (gained_score)
+        if lines > 0:
+            print("se rompieron lineas y se gano " +str(gained_score) +" de score")
+        return gained_score
             
             
     def break_lines(self, t_field):
@@ -138,7 +143,6 @@ class Tetris:
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
         if lines > 0:
-            print("SE ROMPIO UNA LINEA :DDDD")
             self.cleared_lines += lines
             self.calculate_score(lines, t_field)
             self.just_rotate = False
