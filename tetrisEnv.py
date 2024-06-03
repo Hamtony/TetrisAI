@@ -83,17 +83,17 @@ class TetrisEnv(gymnasium.Env):
     
     def _get_obs(self):
         obs = {
-                "x_piece":self.game.figure.x,
-                "y_piece":self.game.figure.y,
-                "piece_type":self.game.figure.type,
-                "piece_rotation":self.game.figure.rotation,
-                "hold":self.game.hold_piece.type,
-                "queue":self.game.queue,
-                "lines_cleared":self.game.cleared_lines,
-                "total_score": self.game.score,
-                "holes": self.game.holes(),
-                "total_height": self.game.total_height(),
-                "bumpiness":self.game.bumpiness()
+                "x_piece":self.game.figure.x, # horizontal position of the current piece (-2 to 7)
+                "y_piece":self.game.figure.y, # vertical position of the current piece (0 to 17)
+                "piece_type":self.game.figure.type, # the type of the current piece (0 to 7)
+                "piece_rotation":self.game.figure.rotation, # the rotation of the current piece (-1 to 2)
+                "hold":self.game.hold_piece.type, # the type of the hold piece (-1 to 7)
+                "queue":self.game.queue, # the queue of the 5 next pieces (5 values of 0 to 7)
+                "lines_cleared":self.game.cleared_lines, # the total number of lines cleared (>=0)
+                "total_score": self.game.score, # the total gained score (>=0)
+                "holes": self.game.holes(), # the total number of holes left in the field (>=0)
+                "total_height": self.game.total_height(), # the sum of all the heights (>=0)
+                "bumpiness":self.game.bumpiness() # the sum of the differences of height between columns (>=0)
             }
         state = {"field":self.game.get_simplified_field()}
         other_state = []

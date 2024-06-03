@@ -31,12 +31,12 @@ for episode in range(1,num_episodes):
             if episode % 5 == 0:
                 #try:
                 title = "gamma_" + str(agent.gamma) + "LR_" + str(agent.learning_rate)    
-                plot(plot_scores,plot_mean_scores,title)
+                #plot(plot_scores,plot_mean_scores,title)
                 #except: pass
             break
         if score > record:
             record = score
-            agent.save("modelsg991lr00025/tetris_dqn2_IOpieces"+ str(record) +".h5")
+            #agent.save("modelsg991lr00025/tetris_dqn2_IOpieces"+ str(record) +".h5")
     agent.replay()
     print('Game', episode, "\nScore", score, '\nRecord: ', record, '\nEpsion: ', agent.epsilon)
     if episode % agent.update_target == 0:
