@@ -2,7 +2,7 @@ from agent import TetrisAgent
 from tetrisEnv import TetrisEnv, dict_to_int_list
 import torch
 agent =  TetrisAgent(epsilon=0, epsilon_min=0)
-agent.model.load_state_dict(torch.load("models0106/tetris_dqn2_IOpieces416.h5",map_location=agent.model.device))
+agent.model.load_state_dict(torch.load("models0106/tetris_dqn2_IOpieces414.h5",map_location=agent.model.device))
 game = TetrisEnv(render_mode="human")
 record = -999
 score = 0

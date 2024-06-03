@@ -4,7 +4,7 @@ from helper import plot
 import torch
 env = TetrisEnv(render_mode="human")
 
-agent = TetrisAgent(gamma=0.991, learning_rate=0.0000001)
+agent = TetrisAgent(gamma=0.991, learning_rate=0.00025)
 agent.model.load_state_dict(torch.load("models/tetris_dqn2_IOpieces3.h5",map_location=agent.model.device))
 agent.target_model
 
@@ -36,7 +36,7 @@ for episode in range(1,num_episodes):
             break
         if score > record:
             record = score
-            agent.save("models0206/tetris_dqn2_IOpieces"+ str(record) +".h5")
+            agent.save("modelsg991lr00025/tetris_dqn2_IOpieces"+ str(record) +".h5")
     agent.replay()
     print('Game', episode, "\nScore", score, '\nRecord: ', record, '\nEpsion: ', agent.epsilon)
     if episode % agent.update_target == 0:
