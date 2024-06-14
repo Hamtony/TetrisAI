@@ -4,12 +4,12 @@ import torch.optim as optim
 import numpy as np
 import random
 from collections import deque
-from model2 import TetrisModel
+from model3 import TetrisModel
 
 class TetrisAgent:
-    def __init__(self, gamma=0.93, learning_rate=0.00001, epsilon=0.8, epsilon_min=0.175, 
-                 epsilon_decay=0.9955, batch_size=69, max_memory=10_000, update_target=15, 
-                 epsiont_every = 10):
+    def __init__(self, gamma=0.92, learning_rate=0.00001, epsilon=1.0, epsilon_min=0.55, 
+                 epsilon_decay=0.99995, batch_size=40, max_memory=1_000, update_target=2, 
+                 epsiont_every = 5, iterate_batch = 4):
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -19,6 +19,7 @@ class TetrisAgent:
         self.update_target = update_target
         self.learning_rate = learning_rate
         self.epsiont_every = epsiont_every
+        self.iterate_batch = iterate_batch
         
         self.memory = deque(maxlen=max_memory)
         self.model = TetrisModel().to(self.get_device())
@@ -55,29 +56,24 @@ class TetrisAgent:
         
         minibatch = random.sample(self.memory, self.batch_size)
         
-        for state, action, reward, next_state, done in minibatch:
-            field = torch.FloatTensor(state['field']).unsqueeze(0).unsqueeze(0).to(self.get_device())
-            other_state = torch.FloatTensor(state['other_state']).unsqueeze(0).to(self.get_device())
-            
-            next_field = torch.FloatTensor(next_state['field']).unsqueeze(0).unsqueeze(0).to(self.get_device())
-            next_other_state = torch.FloatTensor(next_state['other_state']).unsqueeze(0).to(self.get_device())
-            #print("input to model:")
-            #print(field)
-            #print(other_state)
-            #print("input2 to model:")
-            #print(next_field)
-            #print(next_other_state)
-            target = self.model(field, other_state)#get prediction of action vetor with the main model
-            if done:#check if is a terminal state
-                target[0][action] = reward #if it is, sets the Q value for this action with the reward
-            else:
-                next_target = self.target_model(next_field, next_other_state)#get action prection for the nextstate with target model
-                target[0][action] = reward + self.gamma * torch.max(next_target[0]).item() # sets the Q value with the formula: reward * discount * Q value of best action
-            
-                self.optimizer.zero_grad()
-                loss = self.criterion(self.model(field, other_state), target)#get the loss with MSE of the model's prediction vs target Q values
-                loss.backward()#backpropagation
-                self.optimizer.step()
+        for _ in range(self.iterate_batch):
+            for state, action, reward, next_state, done in minibatch:
+                field = torch.FloatTensor(state['field']).unsqueeze(0).unsqueeze(0).to(self.get_device())
+                other_state = torch.FloatTensor(state['other_state']).unsqueeze(0).to(self.get_device())
+                
+                next_field = torch.FloatTensor(next_state['field']).unsqueeze(0).unsqueeze(0).to(self.get_device())
+                next_other_state = torch.FloatTensor(next_state['other_state']).unsqueeze(0).to(self.get_device())
+                target = self.model(field, other_state)#get prediction of action vetor with the main model
+                if done:#check if is a terminal state
+                    target[0][action] = reward #if it is, sets the Q value for this action with the reward
+                else:
+                    next_target = self.target_model(next_field, next_other_state)#get action prection for the nextstate with target model
+                    target[0][action] = reward + self.gamma * torch.max(next_target[0]).item() # sets the Q value with the formula: reward + discount * Q value of best action
+                
+                    self.optimizer.zero_grad()
+                    loss = self.criterion(self.model(field, other_state), target)#get the loss with MSE of the model's prediction vs target Q values
+                    loss.backward()#backpropagation
+                    self.optimizer.step()
         
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay

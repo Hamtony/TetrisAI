@@ -4,11 +4,11 @@ from helper import plot
 import torch
 env = TetrisEnv(render_mode="human")
 
-agent = TetrisAgent(gamma=0.991, learning_rate=0.00025)
-agent.model.load_state_dict(torch.load("models/tetris_dqn2_IOpieces3.h5",map_location=agent.model.device))
+agent = TetrisAgent(gamma=0.92, learning_rate=2.5e-5)
+#agent.model.load_state_dict(torch.load("tetris_dqn2_IOpieces0806.h5",map_location=agent.model.device))
 agent.target_model
 
-num_episodes = 60_000
+num_episodes = 100_000
 plot_scores = []
 plot_mean_scores = []
 total_score = 0
@@ -29,14 +29,14 @@ for episode in range(1,num_episodes):
             mean_score = total_score / episode
             plot_mean_scores.append(mean_score)
             if episode % 5 == 0:
-                #try:
-                title = "gamma_" + str(agent.gamma) + "LR_" + str(agent.learning_rate)    
-                #plot(plot_scores,plot_mean_scores,title)
-                #except: pass
+                try:
+                    title = "gamma_" + str(agent.gamma) + "LR_" + str(agent.learning_rate)    
+                    plot(plot_scores,plot_mean_scores,title)
+                except: pass
             break
         if score > record:
             record = score
-            #agent.save("modelsg991lr00025/tetris_dqn2_IOpieces"+ str(record) +".h5")
+            agent.save("tetris_dqn3_IOpieces1206.h5")
     agent.replay()
     print('Game', episode, "\nScore", score, '\nRecord: ', record, '\nEpsion: ', agent.epsilon)
     if episode % agent.update_target == 0:

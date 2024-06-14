@@ -2,7 +2,7 @@ from Tetris import Tetris
 from tetrisEnv import TetrisEnv
 import pygame
 from pieces import pieces
-from tetrisTrain import Agent
+from agent import TetrisAgent
 colors = [
     (255, 255, 255),#I
     (98, 255, 245),#I
@@ -34,10 +34,10 @@ class Versus():
     def __init__(self, bot_delay=40):
         self.gamePlayer = Tetris(20,10)
         self.counter = 0
-        self.tetrisAgent = TetrisEnv()
-        self.agent = Agent()
-        self.agent.epsilon = 0
-        self.agent.min_epsilon = 0
+        self.agentGame = TetrisEnv()
+        self.tetrisAgent = TetrisAgent()
+        self.tetrisAgent.epsilon = 0
+        self.tetrisAgent.epsilon_min = 0
         pygame.init()
         self.size = (400+400, 500)
         self.screen = pygame.display.set_mode(self.size)
@@ -68,15 +68,15 @@ class Versus():
                                         self.gamePlayer.y + self.gamePlayer.zoom * (i + self.gamePlayer.figure.y) + 1,
                                         self.gamePlayer.zoom - 2, self.gamePlayer.zoom - 2])
                         
-        for i in range(self.tetrisAgent.game.height):
-            for j in range(self.tetrisAgent.game.width):
-                pygame.draw.rect(self.screen, BLACK, [400+(self.tetrisAgent.game.x + self.tetrisAgent.game.zoom * j), self.tetrisAgent.game.y + self.tetrisAgent.game.zoom * i, self.tetrisAgent.game.zoom, self.tetrisAgent.game.zoom],1)
-                if self.tetrisAgent.game.field[i][j] > 0:
-                    pygame.draw.rect(self.screen, colors[self.tetrisAgent.game.field[i][j]],
-                                    [400+(self.tetrisAgent.game.x + self.tetrisAgent.game.zoom * j + 1), 
-                                     (self.tetrisAgent.game.y + self.tetrisAgent.game.zoom * i + 1),
-                                     (self.tetrisAgent.game.zoom - 2), 
-                                     (self.tetrisAgent.game.zoom - 1)])
+        for i in range(self.agentGame.game.height):
+            for j in range(self.agentGame.game.width):
+                pygame.draw.rect(self.screen, BLACK, [400+(self.agentGame.game.x + self.agentGame.game.zoom * j), self.agentGame.game.y + self.agentGame.game.zoom * i, self.agentGame.game.zoom, self.agentGame.game.zoom],1)
+                if self.agentGame.game.field[i][j] > 0:
+                    pygame.draw.rect(self.screen, colors[self.agentGame.game.field[i][j]],
+                                    [400+(self.agentGame.game.x + self.agentGame.game.zoom * j + 1), 
+                                     (self.agentGame.game.y + self.agentGame.game.zoom * i + 1),
+                                     (self.agentGame.game.zoom - 2), 
+                                     (self.agentGame.game.zoom - 1)])
         piece_order = 0
         for actual_piece in self.gamePlayer.queue:
             for i in range(len(pieces[actual_piece][0])):
@@ -96,31 +96,31 @@ class Versus():
                                     self.gamePlayer.zoom - 2, self.gamePlayer.zoom - 2])
                     
         piece_order = 0
-        for actual_piece in self.tetrisAgent.game.queue:
+        for actual_piece in self.agentGame.game.queue:
             for i in range(len(pieces[actual_piece][0])):
                 for j in range(len(pieces[actual_piece][i])):
                     if pieces[actual_piece][0][i][j] > 0:
                         pygame.draw.rect(self.screen, colors[actual_piece+1],
-                                        [400+(self.tetrisAgent.game.x + self.tetrisAgent.game.zoom * (j + self.tetrisAgent.game.width) + 1),
-                                        self.tetrisAgent.game.y + self.tetrisAgent.game.zoom * (i + (piece_order)*4) + 1,
-                                        self.tetrisAgent.game.zoom - 2, self.tetrisAgent.game.zoom - 2])
+                                        [400+(self.agentGame.game.x + self.agentGame.game.zoom * (j + self.agentGame.game.width) + 1),
+                                        self.agentGame.game.y + self.agentGame.game.zoom * (i + (piece_order)*4) + 1,
+                                        self.agentGame.game.zoom - 2, self.agentGame.game.zoom - 2])
             piece_order += 1
-        for i in range(len(self.tetrisAgent.game.hold_piece.image())):
-            for j in range(len(self.tetrisAgent.game.hold_piece.image()[i])):
-                if self.tetrisAgent.game.hold_piece.image()[i][j] > 0:
-                    pygame.draw.rect(self.screen, colors[self.tetrisAgent.game.hold_piece.color],
-                                    [400+(self.tetrisAgent.game.x + self.tetrisAgent.game.zoom * (j -4) + 1),
-                                    self.tetrisAgent.game.y + self.tetrisAgent.game.zoom * (i) + 1,
-                                    self.tetrisAgent.game.zoom - 2, self.tetrisAgent.game.zoom - 2])
+        for i in range(len(self.agentGame.game.hold_piece.image())):
+            for j in range(len(self.agentGame.game.hold_piece.image()[i])):
+                if self.agentGame.game.hold_piece.image()[i][j] > 0:
+                    pygame.draw.rect(self.screen, colors[self.agentGame.game.hold_piece.color],
+                                    [400+(self.agentGame.game.x + self.agentGame.game.zoom * (j -4) + 1),
+                                    self.agentGame.game.y + self.agentGame.game.zoom * (i) + 1,
+                                    self.agentGame.game.zoom - 2, self.agentGame.game.zoom - 2])
         
-        if self.tetrisAgent.game.figure is not None:
-            for i in range(len(self.tetrisAgent.game.figure.image())):
-                for j in range(len(self.tetrisAgent.game.figure.image())):
-                    if self.tetrisAgent.game.figure.image()[i][j]:
-                        pygame.draw.rect(self.screen, colors[self.tetrisAgent.game.figure.color],
-                                        [(self.tetrisAgent.game.x + self.tetrisAgent.game.zoom * (j + self.tetrisAgent.game.figure.x) + 1)+400,
-                                        self.tetrisAgent.game.y + self.tetrisAgent.game.zoom * (i + self.tetrisAgent.game.figure.y) + 1,
-                                        self.tetrisAgent.game.zoom - 2, self.tetrisAgent.game.zoom - 2])
+        if self.agentGame.game.figure is not None:
+            for i in range(len(self.agentGame.game.figure.image())):
+                for j in range(len(self.agentGame.game.figure.image())):
+                    if self.agentGame.game.figure.image()[i][j]:
+                        pygame.draw.rect(self.screen, colors[self.agentGame.game.figure.color],
+                                        [(self.agentGame.game.x + self.agentGame.game.zoom * (j + self.agentGame.game.figure.x) + 1)+400,
+                                        self.agentGame.game.y + self.agentGame.game.zoom * (i + self.agentGame.game.figure.y) + 1,
+                                        self.agentGame.game.zoom - 2, self.agentGame.game.zoom - 2])
                     
                     
         font = pygame.font.SysFont('Calibri', 25, True, False)
@@ -139,9 +139,9 @@ class Versus():
         
     def agent_play(self):
         if(self.actual_bot_delay >= self.bot_delay):
-            state_old = self.agent.get_state(self.tetrisAgent)
-            final_move = self.agent.get_action(state_old)
-            obs, reward, terminated, _, _ = self.tetrisAgent.step(final_move)
+            state = self.agentGame._get_obs()
+            final_move = self.tetrisAgent.act(state)
+            self.agentGame.step(final_move)
             self.actual_bot_delay = 0
         else:
             self.actual_bot_delay += 1

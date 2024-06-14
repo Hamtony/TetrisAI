@@ -1,4 +1,4 @@
-lrs = [0.0005, 0.0001,0.00005, 0.000025, 0.00001, 0.000005, 0.0000025, 0.000001, 0.0000005,
+lrs = [0.0005, 0.0001, 0.00005, 0.000025, 0.00001, 0.000005, 0.0000025, 0.000001, 0.0000005,
        0.00000025, 0.000000001]
 
 from agent import TetrisAgent
@@ -12,8 +12,8 @@ for lr in lrs:
     
     env = TetrisEnv()
 
-    agent = TetrisAgent(gamma=0.992,learning_rate=lr)
-    agent.model.load_state_dict(torch.load("models/tetris_dqn2_IOpieces3.h5"))
+    agent = TetrisAgent(gamma=0.92,learning_rate=lr)
+    #agent.model.load_state_dict(torch.load("models/tetris_dqn2_IOpieces3.h5"))
     agent.target_model
 
     num_episodes = 5000
@@ -37,10 +37,10 @@ for lr in lrs:
                 mean_score = total_score / episode
                 plot_mean_scores.append(mean_score)
                 if episode % 5 == 0:
-                    #try:
-                    title = "gamma_" + str(agent.gamma) + "LR_" + str(agent.learning_rate)    
-                    plot(plot_scores,plot_mean_scores,title)
-                    #except: pass
+                    try:
+                        title = "gamma_" + str(agent.gamma) + "LR_" + str(agent.learning_rate)    
+                        plot(plot_scores,plot_mean_scores,title)
+                    except: pass
                 break
             if score > record:
                 record = score

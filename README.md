@@ -31,7 +31,7 @@ pip install gymnasium torch matplotlib numpy pygame
 * The game also increase the score a lot when lines are cleared, a Tspin is made or a perfect clear happend.
 
 ## The Model
-* The model has 2 Convolutional 2D layers + ReLU, then a flatten layer. Then this it's concatenated with other 15 parameters to process it with the a ReLU layer and then a linear for the output:
+* The model has 2 Convolutional 2D layers + ReLU, then a flatten layer. Then this is concatenated with other 15 parameters to process it with the a ReLU layer and then a linear for the output:
 ```python
     def __init__(self, freeze=False):
         super().__init__()
