@@ -18,7 +18,7 @@ for episode in range(1,num_episodes):
     state, _ = env.reset()
     done = False
     while not done:
-        action = agent.act(state)
+        action = agent.act(state)   
         next_state, reward, done, _, info = env.step(action)
         score = info['score']
         agent.remember(state, action, reward, next_state, done)

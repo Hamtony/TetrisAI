@@ -69,6 +69,7 @@ class TetrisEnv(gymnasium.Env):
             6: 'hold',
             7: 'Rotate180'
         }
+        
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
         if self.render_mode == "human":
@@ -172,7 +173,7 @@ class TetrisEnv(gymnasium.Env):
             self.actual_holes = self.game.holes()
             
             
-        if self.game.score > 5000:
+        if self.game.score > 20000:
             self.game.score +=500
             terminated = True
 

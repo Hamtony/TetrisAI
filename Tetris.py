@@ -125,7 +125,7 @@ class Tetris:
             gained_score = 1
         if self.all_clear():
             gained_score = gained_score + 10
-        gained_score *= 100
+        gained_score *= 300
         self.score += (gained_score)
         if lines > 0:
             print("se rompieron lineas y se gano " +str(gained_score) +" de score")

@@ -8,8 +8,8 @@ from model3 import TetrisModel
 
 class TetrisAgent:
     def __init__(self, gamma=0.92, learning_rate=0.00001, epsilon=1.0, epsilon_min=0.55, 
-                 epsilon_decay=0.99995, batch_size=40, max_memory=1_000, update_target=2, 
-                 epsiont_every = 5, iterate_batch = 4):
+                 epsilon_decay=0.99995, batch_size=40, max_memory=10_000, update_target=2, 
+                 epsiont_every = 5, iterate_batch = 3):
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
