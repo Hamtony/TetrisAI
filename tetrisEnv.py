@@ -37,10 +37,11 @@ def dict_to_int_list(observation_space:dict):
 class TetrisEnv(gymnasium.Env):
     metadata = {"render_modes": ["human","none"], "render_fps":4}
     
-    def __init__(self, height=20, width=10, render_mode="none"):
+    def __init__(self, metrics, height=20, width=10, render_mode="none"):
         self.width = width
         self.height = height
         self.game = Tetris(self.height,self.width)
+        self.metrics = metrics
         self.moves_without_drop = 0
         self.actualscore = self.game.score
         self.actual_bumpiness = self.game.bumpiness()
@@ -163,11 +164,11 @@ class TetrisEnv(gymnasium.Env):
         #score / reward
             
         if self._action_to_direction[idx_action] == 'drop':
-            self.game.score += 1.5
-            self.game.score += drop_height / 8
-            self.game.score += -(self.game.bumpiness() - self.actual_bumpiness) / 16
-            self.game.score += -(self.game.total_height() - self.actual_total_height) / 16
-            self.game.score += -(self.game.holes() - self.actual_holes) / 4
+            self.game.score += self.metrics['drop']
+            self.game.score += drop_height / self.metrics['height']
+            self.game.score += -(self.game.bumpiness() - self.actual_bumpiness) / self.metrics['bumpiness']
+            self.game.score += -(self.game.total_height() - self.actual_total_height) / self.metrics['total_height']
+            self.game.score += -(self.game.holes() - self.actual_holes) / self.metrics['holes']
             self.actual_bumpiness = self.game.bumpiness()
             self.actual_total_height = self.game.total_height()
             self.actual_holes = self.game.holes()

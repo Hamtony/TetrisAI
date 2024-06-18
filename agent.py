@@ -35,6 +35,14 @@ class TetrisAgent:
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
+        if reward > 50:
+            self.memory.append((state, action, reward, next_state, done))
+            self.memory.append((state, action, reward, next_state, done))
+            self.memory.append((state, action, reward, next_state, done))
+            self.memory.append((state, action, reward, next_state, done))
+            self.memory.append((state, action, reward, next_state, done))
+            self.memory.append((state, action, reward, next_state, done))
+            
 
     def act(self, state):
         if np.random.rand() <= self.epsilon and not (self.espisode % self.epsiont_every == 0):
