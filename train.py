@@ -12,9 +12,8 @@ metrics = {
 env = TetrisEnv(metrics=metrics,render_mode="human")
 
 agent = TetrisAgent(gamma=0.92, learning_rate=2.5e-5)
-agent.model.load_state_dict(torch.load("tetris_dqn3_IOpieces1606.h5",map_location=agent.model.device))
-agent.target_model
-
+agent.model.load_state_dict(torch.load("tetris_dqn3_IOpieces1806.h5",map_location=agent.model.device))
+agent.target_model.load_state_dict(torch.load("tetris_dqn3_IOpieces1806.h5",map_location=agent.model.device))
 num_episodes = 25_000
 plot_scores = []
 plot_mean_scores = []

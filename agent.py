@@ -8,7 +8,7 @@ from model3 import TetrisModel
 
 class TetrisAgent:
     def __init__(self, gamma=0.92, learning_rate=0.00001, epsilon=1.0, epsilon_min=0.55, 
-                 epsilon_decay=0.99995, batch_size=40, max_memory=10_000, update_target=2, 
+                 epsilon_decay=0.9995, batch_size=40, max_memory=10_000, update_target=2, 
                  epsiont_every = 5, iterate_batch = 3):
         self.gamma = gamma
         self.epsilon = epsilon
@@ -22,6 +22,7 @@ class TetrisAgent:
         self.iterate_batch = iterate_batch
         
         self.memory = deque(maxlen=max_memory)
+        self.good_memorys = deque(maxlen=max_memory)
         self.model = TetrisModel().to(self.get_device())
         self.target_model = TetrisModel().to(self.get_device())
         self.update_target_model()
@@ -36,13 +37,7 @@ class TetrisAgent:
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
         if reward > 50:
-            self.memory.append((state, action, reward, next_state, done))
-            self.memory.append((state, action, reward, next_state, done))
-            self.memory.append((state, action, reward, next_state, done))
-            self.memory.append((state, action, reward, next_state, done))
-            self.memory.append((state, action, reward, next_state, done))
-            self.memory.append((state, action, reward, next_state, done))
-            
+            self.good_memorys.append((state, action, reward, next_state, done))         
 
     def act(self, state):
         if np.random.rand() <= self.epsilon and not (self.espisode % self.epsiont_every == 0):
@@ -63,6 +58,9 @@ class TetrisAgent:
             return
         
         minibatch = random.sample(self.memory, self.batch_size)
+        
+        if len(self.good_memorys) >= self.batch_size:
+            minibatch.extend(random.sample(self.good_memorys, self.batch_size))
         
         for _ in range(self.iterate_batch):
             for state, action, reward, next_state, done in minibatch:

@@ -109,12 +109,12 @@ class Tetris:
     def calculate_score(self, lines, t_field):
         gained_score = 0
         if(self.figure.type == 5 and self.just_rotate):
-            
-            if self.check_tspin(t_field):
-                print("Tspin!!!")
-                gained_score = lines*2
-                self.score = self.score+gained_score
-                return gained_score
+            pass
+            #if self.check_tspin(t_field):
+            #    print("Tspin!!!")
+            #    gained_score = lines*2
+            #    self.score = self.score+gained_score
+            #    return gained_score
         if lines == 4:
             gained_score =  4
         if lines == 3:
@@ -125,7 +125,7 @@ class Tetris:
             gained_score = 1
         if self.all_clear():
             gained_score = gained_score + 10
-        gained_score *= 300
+        gained_score *= 500
         self.score += (gained_score)
         if lines > 0:
             print("se rompieron lineas y se gano " +str(gained_score) +" de score")
