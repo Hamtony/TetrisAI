@@ -17,15 +17,17 @@ class Tetris:
         self.no_auto_freeze = 9999999999
         self.limit_no_freeze = 20
         self.hold_piece = Figure(3, 0, -1)
-        self.pool = [6,0]
+        self.pool = [0,1,2,3,4,5,6]
         self.queue = []
         self.hold_avaible = True
         self. just_rotate = False
         self.cleared_lines = 0
-    
+        self.actual_bumpiness = self.bumpiness()
+        self.actual_total_height = self.total_height()
+        self.actual_holes = self.holes()
         self.height = height
         self.width = width
-        self.score = 0
+        self.score = 0.
         
         for i in range(height):
             new_line = []
@@ -55,7 +57,7 @@ class Tetris:
 
     def rand_fig(self):
         if len(self.pool) == 0:
-            self.pool = [6,0]
+            self.pool = [0,1,2,3,4,5,6]
         piece_index = random.randint(0,len(self.pool)-1)
         piece = self.pool[piece_index]
         self.pool.remove(piece)
@@ -107,12 +109,12 @@ class Tetris:
     def calculate_score(self, lines, t_field):
         gained_score = 0
         if(self.figure.type == 5 and self.just_rotate):
-            
-            if self.check_tspin(t_field):
-                print("Tspin!!!")
-                gained_score = lines*2
-                self.score = self.score+gained_score
-                return gained_score
+            pass
+            #if self.check_tspin(t_field):
+            #    print("Tspin!!!")
+            #    gained_score = lines*2
+            #    self.score = self.score+gained_score
+            #    return gained_score
         if lines == 4:
             gained_score =  4
         if lines == 3:
@@ -123,7 +125,7 @@ class Tetris:
             gained_score = 1
         if self.all_clear():
             gained_score = gained_score + 10
-        gained_score *= 50
+        gained_score *= 500
         self.score += (gained_score)
         if lines > 0:
             print("se rompieron lineas y se gano " +str(gained_score) +" de score")
@@ -146,13 +148,22 @@ class Tetris:
             self.cleared_lines += lines
             self.calculate_score(lines, t_field)
             self.just_rotate = False
-
+    def micro_scores(self, drop_height):
+            self.score += drop_height / 16
+            self.score += -(self.bumpiness() - self.actual_bumpiness) / 16
+            self.score += -(self.total_height() - self.actual_total_height) / 8
+            self.score += -(self.holes() - self.actual_holes) / 4
+            self.actual_bumpiness = self.bumpiness()
+            self.actual_total_height = self.total_height()
+            self.actual_holes = self.holes()
+            
     def drop(self):
         while not self.intersects():
             self.figure.y += 1
         self.figure.y -= 1
         drop_height = self.figure.y
         self.freeze()
+        self.micro_scores(drop_height)
         return drop_height
 
     def go_down(self):

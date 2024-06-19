@@ -22,7 +22,7 @@ for gamma in gammas:
     env = TetrisEnv()
 
     agent = TetrisAgent(gamma=gamma)
-    agent.model.load_state_dict(torch.load("models/tetris_dqn2_IOpieces3.h5"))
+    #agent.model.load_state_dict(torch.load("models/tetris_dqn2_IOpieces3.h5"))
     agent.target_model
 
     num_episodes = 3000

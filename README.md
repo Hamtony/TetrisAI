@@ -7,7 +7,7 @@ pip install gymnasium torch matplotlib numpy pygame
 
 ## The Enviroment
 
-* The agent is going to act in the tetris game we made using pygame, all the code of the game is in [Tetris.py](Tetris.py) and it's used to create the custom enviroment in 
+* The agent is going to act in the tetris game we made using pygame, all the code of the game is in [Tetris.py](Tetris.py) and it's used to create the custom enviroment in [tetrisEnv.py](tetrisEnv.py) 
 
 ```python
         #score / reward
@@ -31,7 +31,7 @@ pip install gymnasium torch matplotlib numpy pygame
 * The game also increase the score a lot when lines are cleared, a Tspin is made or a perfect clear happend.
 
 ## The Model
-* The model has 2 Convolutional layers, then a flatten layer and concatenate with 15 parameters to process it with the a ReLU layer and then a linear for the output:
+* The model has 2 Convolutional 2D layers + ReLU, then a flatten layer. Then this is concatenated with other 15 parameters to process it with the a ReLU layer and then a linear for the output:
 ```python
     def __init__(self, freeze=False):
         super().__init__()
@@ -60,7 +60,7 @@ the model is defined [model2.py](model2.py)
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 ```
-* Then at the end of an episode, the agent takes (bach size) number of samples of the memory to make predictions, calculate Q values and use them to get a loss and preform backpropagation with the ADAM optimaizer.
+* Then at the end of an episode, the agent takes (bach size) number of samples of the memory to make predictions, calculate Q values and use them to get a loss to preform backpropagation with the ADAM optimaizer.
 
 ```python
 for state, action, reward, next_state, done in minibatch:
@@ -100,9 +100,9 @@ the hyperparameters are declared in [agent.py](agent.py)
 
 ## The Data
 
-* The shape of the 2 tensors to give to the model is like this:
+* The shape of the 2 tensors to give to the model have this structure:
 ```
-input to model:
+input:
 tensor([[[[0., 0., 0., 0., 2., 2., 0., 0., 0., 0.],
           [0., 0., 0., 0., 2., 2., 0., 0., 0., 0.],
           [0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
@@ -126,30 +126,21 @@ tensor([[[[0., 0., 0., 0., 2., 2., 0., 0., 0., 0.],
 tensor([[ 3.,  0.,  6.,  0.,  0.,  6.,  6.,  0.,  6.,  0.,  0., 73., 20., 64.,
          26.]], device='cuda:0')
 ```
-* This the tensor form of the data recived the this function _get_obs() of the [tetrisEnv.py](tetrisEnv.py)
+* This the tensor form of the data recived the this function _get_obs() found in [tetrisEnv.py](tetrisEnv.py)
 ```python
     def _get_obs(self):
         obs = {
-                "x_piece":self.game.figure.x,
-                "y_piece":self.game.figure.y,
-                "piece_type":self.game.figure.type,
-                "piece_rotation":self.game.figure.rotation,
-                "hold":self.game.hold_piece.type,
-                "queue":self.game.queue,
-                "lines_cleared":self.game.cleared_lines,
-                "total_score": self.game.score,
-                "holes": self.game.holes(),
-                "total_height": self.game.total_height(),
-                "bumpiness":self.game.bumpiness()
+                "x_piece":self.game.figure.x, # horizontal position of the current piece (-2 to 7)
+                "y_piece":self.game.figure.y, # vertical position of the current piece (0 to 17)
+                "piece_type":self.game.figure.type, # the type of the current piece (0 to 7)
+                "piece_rotation":self.game.figure.rotation, # the rotation of the current piece (-1 to 2)
+                "hold":self.game.hold_piece.type, # the type of the hold piece (-1 to 7)
+                "queue":self.game.queue, # the queue of the 5 next pieces (5 values of 0 to 7)
+                "lines_cleared":self.game.cleared_lines, # the total number of lines cleared (>=0)
+                "total_score": self.game.score, # the total gained score (>=0)
+                "holes": self.game.holes(), # the total number of holes left in the field (>=0)
+                "total_height": self.game.total_height(), # the sum of all the heights (>=0)
+                "bumpiness":self.game.bumpiness() # the sum of the differences of height between columns (>=0)
             }
-        state = {"field":self.game.get_simplified_field()}
-        other_state = []
-        for key, value in obs.items():
-            if key == 'queue':
-                other_state.extend(value)
-            else:    
-                other_state.append(value)
-        state['other_state'] = other_state
-        return state
 ```
 

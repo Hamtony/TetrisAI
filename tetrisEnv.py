@@ -37,12 +37,16 @@ def dict_to_int_list(observation_space:dict):
 class TetrisEnv(gymnasium.Env):
     metadata = {"render_modes": ["human","none"], "render_fps":4}
     
-    def __init__(self, height=20, width=10, render_mode="none"):
+    def __init__(self, metrics, height=20, width=10, render_mode="none"):
         self.width = width
         self.height = height
         self.game = Tetris(self.height,self.width)
+        self.metrics = metrics
         self.moves_without_drop = 0
         self.actualscore = self.game.score
+        self.actual_bumpiness = self.game.bumpiness()
+        self.actual_total_height = self.game.total_height()
+        self.actual_holes = self.game.holes()
         self.observation_space = spaces.Dict(
             {
                 "x_piece":spaces.Discrete(self.width,start=-2),
@@ -57,15 +61,16 @@ class TetrisEnv(gymnasium.Env):
         #ACTIONS = ['Down','Left','Right','Rotatec','Rotatecc', 'Rotate180', 'hold', 'drop' ]
         self.action_space = spaces.Discrete(8,start=0)
         self._action_to_direction = {
-            0: 'Down',
+            0: 'drop',
             1: 'Left',
             2: 'Right',
             3: 'Rotatec',
             4: 'Rotatecc',
-            5: 'Rotate180',
+            5: 'Down',
             6: 'hold',
-            7: 'drop',
+            7: 'Rotate180'
         }
+        
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
         if self.render_mode == "human":
@@ -83,17 +88,18 @@ class TetrisEnv(gymnasium.Env):
     
     def _get_obs(self):
         obs = {
-                "x_piece":self.game.figure.x,
-                "y_piece":self.game.figure.y,
-                "piece_type":self.game.figure.type,
-                "piece_rotation":self.game.figure.rotation,
-                "hold":self.game.hold_piece.type,
-                "queue":self.game.queue,
-                "lines_cleared":self.game.cleared_lines,
-                "total_score": self.game.score,
-                "holes": self.game.holes(),
-                "total_height": self.game.total_height(),
-                "bumpiness":self.game.bumpiness()
+                "x_piece":self.game.figure.x, # horizontal position of the current piece (-2 to 7)
+                "y_piece":self.game.figure.y, # vertical position of the current piece (0 to 17)
+                "piece_type":self.game.figure.type, # the type of the current piece (0 to 7)
+                "piece_rotation":self.game.figure.rotation, # the rotation of the current piece (-1 to 2)
+                "hold":self.game.hold_piece.type, # the type of the hold piece (-1 to 7)
+                "queue":self.game.queue, # the queue of the 5 next pieces (5 values of 0 to 7)
+                "lines_cleared":self.game.cleared_lines, # the total number of lines cleared (>=0)
+                "total_score": self.game.score, # the total gained score (>=0)
+                "holes": self.game.holes(), # the total number of holes left in the field (>=0)
+                "total_height": self.game.total_height(), # the sum of all the heights (>=0)
+                "bumpiness":self.game.bumpiness(), # the sum of the differences of height between columns (>=0)
+                "moves_without_drop": self.moves_without_drop
             }
         state = {"field":self.game.get_simplified_field()}
         other_state = []
@@ -140,29 +146,35 @@ class TetrisEnv(gymnasium.Env):
         elif self._action_to_direction[idx_action] == 'hold':
             self.game.hold()
         elif self._action_to_direction[idx_action] == 'drop':
-            drop_height = self.game.drop()
-            
-            
+            drop_height = self.game.drop()   
 
         terminated = self.game.state == "gameover"
         if terminated:
             self.moves_without_drop =0
-            self.game.score -= 30
+            self.game.score -= 12
         
         #autodrop
         if self._action_to_direction[idx_action] != 'drop':
             self.moves_without_drop += 1
         if self.moves_without_drop >= 30:
             self.game.drop()
-            self.game.score-=1
+            self.game.score -= 5
             self.moves_without_drop =0
             
         #score / reward
             
         if self._action_to_direction[idx_action] == 'drop':
-            self.game.score += (drop_height) - 6
+            self.game.score += self.metrics['drop']
+            self.game.score += drop_height / self.metrics['height']
+            self.game.score += -(self.game.bumpiness() - self.actual_bumpiness) / self.metrics['bumpiness']
+            self.game.score += -(self.game.total_height() - self.actual_total_height) / self.metrics['total_height']
+            self.game.score += -(self.game.holes() - self.actual_holes) / self.metrics['holes']
+            self.actual_bumpiness = self.game.bumpiness()
+            self.actual_total_height = self.game.total_height()
+            self.actual_holes = self.game.holes()
             
-        if self.game.score > 5000:
+            
+        if self.game.score > 20000:
             self.game.score +=500
             terminated = True
 
@@ -173,6 +185,7 @@ class TetrisEnv(gymnasium.Env):
             reward = 0
             
         #get new state
+        
         observation = self._get_obs()
         
         info = self._get_info()
