@@ -1,1 +1,40 @@
-{"selections": [{"gamma": 0.9655169727100497, "lr": 5.186622938767696e-06, "drop": 3, "height": 8, "bumpiness": 11, "total_height": 5, "holes": 2}, {"gamma": 0.9634690287017147, "lr": 1.3817747127204475e-06, "drop": 5, "height": 8, "bumpiness": 11, "total_height": 9, "holes": 14}, {"gamma": 0.9156381118178114, "lr": 1.3817747127204475e-06, "drop": 3, "height": 8, "bumpiness": 11, "total_height": 9, "holes": 2}, {"gamma": 0.9655169727100497, "lr": 3.6243327980743555e-05, "drop": 3, "height": 8, "bumpiness": 11, "total_height": 5, "holes": 2}]}
+{
+    "selections": [
+        {
+            "gamma": 0.9300017838443879,
+            "lr": 1.952504967188989e-05,
+            "drop": 3,
+            "height": 16,
+            "bumpiness": 16,
+            "total_height": 7,
+            "holes": 18
+        },
+        {
+            "gamma": 0.9575813280484516,
+            "lr": 3.842102821343203e-05,
+            "drop": 1,
+            "height": 16,
+            "bumpiness": 16,
+            "total_height": 7,
+            "holes": 1
+        },
+        {
+            "gamma": 0.9300017838443879,
+            "lr": 3.842102821343203e-05,
+            "drop": 3,
+            "height": 16,
+            "bumpiness": 16,
+            "total_height": 18,
+            "holes": 18
+        },
+        {
+            "gamma": 0.9252635066270241,
+            "lr": 5.67744090478074e-05,
+            "drop": 3,
+            "height": 9,
+            "bumpiness": 4,
+            "total_height": 18,
+            "holes": 1
+        }
+    ]
+}
