@@ -2,6 +2,7 @@ from gymnasium import spaces
 import gymnasium
 import pygame
 import numpy as np
+from pieces import pieces
 import random
 from Tetris import Tetris
 
@@ -146,7 +147,8 @@ class TetrisEnv(gymnasium.Env):
         elif self._action_to_direction[idx_action] == 'hold':
             self.game.hold()
         elif self._action_to_direction[idx_action] == 'drop':
-            drop_height = self.game.drop()   
+            drop_height = self.game.drop()
+            self.moves_without_drop = 0
 
         terminated = self.game.state == "gameover"
         if terminated:
@@ -218,7 +220,23 @@ class TetrisEnv(gymnasium.Env):
                                         [self.game.x + self.game.zoom * (j + self.game.figure.x) + 1,
                                         self.game.y + self.game.zoom * (i + self.game.figure.y) + 1,
                                         self.game.zoom - 2, self.game.zoom - 2])
-
+        piece_order = 0
+        for actual_piece in self.game.queue:
+            for i in range(len(pieces[actual_piece][0])):
+                for j in range(len(pieces[actual_piece][i])):
+                    if pieces[actual_piece][0][i][j] > 0:
+                        pygame.draw.rect(self.screen, colors[actual_piece+1],
+                                        [self.game.x + self.game.zoom * (j + self.game.width) + 1,
+                                        self.game.y + self.game.zoom * (i + (piece_order)*4) + 1,
+                                        self.game.zoom - 2, self.game.zoom - 2])
+            piece_order += 1
+        for i in range(len(self.game.hold_piece.image())):
+            for j in range(len(self.game.hold_piece.image()[i])):
+                if self.game.hold_piece.image()[i][j] > 0:
+                    pygame.draw.rect(self.screen, colors[self.game.hold_piece.color],
+                                    [self.game.x + self.game.zoom * (j -4) + 1,
+                                    self.game.y + self.game.zoom * (i) + 1,
+                                    self.game.zoom - 2, self.game.zoom - 2])
         font = pygame.font.SysFont('Calibri', 25, True, False)
         font1 = pygame.font.SysFont('Calibri', 65, True, False)
         text = font.render("Score: " + str(self.game.score), True, BLACK)

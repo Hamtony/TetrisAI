@@ -3,6 +3,8 @@ from agent import TetrisAgent
 from helper import plot
 import random
 import json
+lrs = [0.0005, 0.0001, 0.00005, 0.000025, 0.00001, 0.000005, 0.0000025, 0.000001, 0.0000005,
+       0.00000025, 0.000000001]
 def fitness(params : dict):
     agent = TetrisAgent(gamma=params['gamma'], learning_rate=params['lr'])
     metrics = {
@@ -12,7 +14,7 @@ def fitness(params : dict):
         'total_height' : params['total_height'],
         'holes' : params['holes']
     }
-    env = TetrisEnv(metrics=metrics)
+    env = TetrisEnv(metrics=metrics,render_mode="human")
     num_episodes = 700
     plot_scores = []
     plot_mean_scores = []
@@ -65,7 +67,7 @@ class Cromosom:
         
     def randommize(self):
         self.gens['gamma'] = random.uniform(0.9, 0.999)
-        self.gens['lr'] = random.uniform(0.00000001, 0.0001)
+        self.gens['lr'] = random.sample(lrs,1)[0]
         self.gens['drop'] = random.randint(0, 6)
         self.gens['height'] = random.randint(1, 20)
         self.gens['bumpiness'] = random.randint(1, 20)
@@ -81,7 +83,7 @@ class Cromosom:
             case 0:
                 self.gens['gamma'] = random.uniform(0.9, 0.999)
             case 1:
-                self.gens['lr'] = random.uniform(0.00000001, 0.0001) 
+                self.gens['lr'] = random.sample(lrs, 1)[0]
             case 2:
                 self.gens['drop'] = random.randint(0, 6)
             case 3:
