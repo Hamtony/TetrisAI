@@ -19,11 +19,11 @@ keys = {
     'reset': pygame.K_r
 }
 metrics = {
-    "drop": 1,  
-    "height": 16,
-    "bumpiness": 16,
-    "total_height": 7,
-    "holes": 1
+    "drop": 0.2,
+    "height": 8,
+    "bumpiness": 13,
+    "total_height": 14,
+    "holes": 15
 }
 env = TetrisEnv(metrics=metrics,render_mode="human")
 good_memory = {"data":[]}
@@ -53,9 +53,9 @@ while True:
             if event.key == keys['hold']:
                 action = 6
             if event.key == pygame.K_ESCAPE:
-                json.dump(good_memory, open("real_data.json"))
+                json.dump(good_memory, open("real_data.json","w"))
     if action != -1:
         next_state, reward, done, _, info = env.step(action)
         score = info['score']
-        good_memory['data'].append((state, action, reward, next_state, done))
+        good_memory['data'].append((state, action, reward, next_state, False))
         state = next_state

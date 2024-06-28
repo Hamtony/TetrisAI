@@ -15,7 +15,7 @@ def fitness(params : dict):
         'holes' : params['holes']
     }
     env = TetrisEnv(metrics=metrics,render_mode="human")
-    num_episodes = 700
+    num_episodes = 1200
     plot_scores = []
     plot_mean_scores = []
     total_score = 0

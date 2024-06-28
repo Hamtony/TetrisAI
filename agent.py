@@ -5,11 +5,11 @@ import numpy as np
 import random
 from collections import deque
 from model3 import TetrisModel
-
+import json
 class TetrisAgent:
-    def __init__(self, gamma=0.92, learning_rate=0.00001, epsilon=1.0, epsilon_min=0.55, 
-                 epsilon_decay=0.9995, batch_size=40, max_memory=10_000, update_target=2, 
-                 epsiont_every = 5, iterate_batch = 3):
+    def __init__(self, gamma=0.92, learning_rate=0.00001, epsilon=1.0, epsilon_min=0.45, 
+                 epsilon_decay=0.9995, batch_size=60, max_memory=10_000, update_target=5, 
+                 epsiont_every = 5, iterate_batch = 1, ref_data=False):
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -20,6 +20,12 @@ class TetrisAgent:
         self.learning_rate = learning_rate
         self.epsiont_every = epsiont_every
         self.iterate_batch = iterate_batch
+        self.ref_data = ref_data
+        if ref_data:
+            f = open('real_data.json')
+            self.reference_data = json.load(f)['data']
+            print("loaded " + str(len(self.reference_data)) + " reference data")
+            f.close()
         
         self.memory = deque(maxlen=max_memory)
         self.good_memorys = deque(maxlen=max_memory)
@@ -59,8 +65,11 @@ class TetrisAgent:
         
         minibatch = random.sample(self.memory, self.batch_size)
         
-        if len(self.good_memorys) >= self.batch_size:
-            minibatch.extend(random.sample(self.good_memorys, self.batch_size))
+        if len(self.good_memorys) >= int(self.batch_size/15):
+            minibatch.extend(random.sample(self.good_memorys, int(self.batch_size/15)))
+        if self.ref_data:
+            if len(self.reference_data) >= int(self.batch_size/20):
+                minibatch.extend(random.sample(self.reference_data, int(self.batch_size/20)))
         
         for _ in range(self.iterate_batch):
             for state, action, reward, next_state, done in minibatch:
@@ -74,12 +83,12 @@ class TetrisAgent:
                     target[0][action] = reward #if it is, sets the Q value for this action with the reward
                 else:
                     next_target = self.target_model(next_field, next_other_state)#get action prection for the nextstate with target model
-                    target[0][action] = reward + self.gamma * torch.max(next_target[0]).item() # sets the Q value with the formula: reward + discount * Q value of best action
+                    target[0][action] = reward + self.gamma * torch.max(next_target[0]).item() # sets the Q value with the formula: reward + discount * max Q value of best action for next state
                 
-                    self.optimizer.zero_grad()
-                    loss = self.criterion(self.model(field, other_state), target)#get the loss with MSE of the model's prediction vs target Q values
-                    loss.backward()#backpropagation
-                    self.optimizer.step()
+                self.optimizer.zero_grad()
+                loss = self.criterion(self.model(field, other_state), target)#get the loss with MSE of the model's prediction vs target Q values
+                loss.backward()#backpropagation
+                self.optimizer.step()
         
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay

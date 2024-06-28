@@ -3,6 +3,7 @@ from tetrisEnv import TetrisEnv
 import pygame
 from pieces import pieces
 from agent import TetrisAgent
+import torch
 colors = [
     (255, 255, 255),#I
     (98, 255, 245),#I
@@ -31,13 +32,24 @@ keys = {
 }
 class Versus():
     
-    def __init__(self, bot_delay=40):
+    def __init__(self, bot_delay=5):
         self.gamePlayer = Tetris(20,10)
         self.counter = 0
-        self.agentGame = TetrisEnv()
+        metrics = {
+            "drop": 0.2,
+            "height": 8,
+            "bumpiness": 13,
+            "total_height": 14,
+            "holes": 15
+        }
+        self.agentGame = TetrisEnv(metrics=metrics)
         self.tetrisAgent = TetrisAgent()
+        self.tetrisAgent.model.load_state_dict(torch.load("models/tetris_dqn3_IOpieces2406_2.h5",map_location=self.tetrisAgent.model.device))
+        self.tetrisAgent.target_model.load_state_dict(torch.load("models/tetris_dqn3_IOpieces2406_2.h5",map_location=self.tetrisAgent.model.device))
         self.tetrisAgent.epsilon = 0
         self.tetrisAgent.epsilon_min = 0
+        self.agentAttack = 0
+        self.playerAttack = 0
         pygame.init()
         self.size = (400+400, 500)
         self.screen = pygame.display.set_mode(self.size)
@@ -143,6 +155,11 @@ class Versus():
             final_move = self.tetrisAgent.act(state)
             self.agentGame.step(final_move)
             self.actual_bot_delay = 0
+            if self.agentGame.attack > 0:
+                self.playerAttack = self.agentGame.attack
+                self.agentGame.attack = 0
+            self.agentGame.game.add_attack_rows(self.agentAttack)
+            self.agentAttack = 0
         else:
             self.actual_bot_delay += 1
             
@@ -170,7 +187,10 @@ class Versus():
                 if event.key == keys['right']:
                     self.gamePlayer.go_side(1)
                 if event.key == keys['drop']:
-                    self.gamePlayer.drop()
+                    _,_2, attack = self.gamePlayer.drop()
+                    self.agentAttack += attack
+                    self.gamePlayer.add_attack_rows(self.playerAttack)
+                    self.playerAttack = 0
                 if event.key == keys['reset']:
                     self.gamePlayer.__init__(20, 10)
                 if event.key == keys['hold']:

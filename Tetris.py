@@ -2,6 +2,7 @@ import pygame
 import random
 from figure import Figure
 import time
+from collections import deque
 class Tetris:
     def __init__(self, height, width):
         self.level = 2
@@ -17,7 +18,7 @@ class Tetris:
         self.no_auto_freeze = 9999999999
         self.limit_no_freeze = 20
         self.hold_piece = Figure(3, 0, -1)
-        self.pool = [0,1,2,3,4,5,6]
+        self.pool = [0,6]
         self.queue = []
         self.hold_avaible = True
         self. just_rotate = False
@@ -28,6 +29,7 @@ class Tetris:
         self.height = height
         self.width = width
         self.score = 0.
+        self.attack = 0
         
         for i in range(height):
             new_line = []
@@ -57,7 +59,7 @@ class Tetris:
 
     def rand_fig(self):
         if len(self.pool) == 0:
-            self.pool = [0,1,2,3,4,5,6]
+            self.pool = [0,6]
         piece_index = random.randint(0,len(self.pool)-1)
         piece = self.pool[piece_index]
         self.pool.remove(piece)
@@ -67,6 +69,7 @@ class Tetris:
         if len(self.queue) < 5:
             self.queue.append(self.rand_fig())
             self.update_queue()
+            
     def prinField(self, field):
         print("field:")
         for line in field:
@@ -115,56 +118,83 @@ class Tetris:
             #    gained_score = lines*2
             #    self.score = self.score+gained_score
             #    return gained_score
+        attack = 0
         if lines == 4:
             gained_score =  4
+            attack = 4
         if lines == 3:
             gained_score = 3
+            attack = 2
         if lines == 2:
             gained_score = 2
+            attack = 1
         if lines == 1:
             gained_score = 1
         if self.all_clear():
+            attack +=10
             gained_score = gained_score + 10
+        attack = attack
         gained_score *= 500
         self.score += (gained_score)
         if lines > 0:
             print("se rompieron lineas y se gano " +str(gained_score) +" de score")
-        return gained_score
+        return gained_score, attack
             
-            
+    def add_attack_rows(self, attack_rows):
+        board_deque = deque(self.field,maxlen=20)
+        for _ in range(attack_rows):
+            row = [4] * 10
+            empty_index = random.randint(0, 9)
+            row[empty_index] = 0
+            board_deque.append(row)
+        
+        while len(board_deque) > 20:
+            board_deque.pop()
+        self.field = []
+        for row in board_deque:
+            self.field.append(row)
+        return self.field
+    
     def break_lines(self, t_field):
         lines = 0
-        for i in range(1, self.height):
+        for i in range(0, self.height):
             zeros = 0
             for j in range(self.width):
                 if self.field[i][j] == 0:
                     zeros += 1
             if zeros == 0:
                 lines += 1
-                for i1 in range(i, 1, -1):
+                for i1 in range(i, -1, -1):
                     for j in range(self.width):
                         self.field[i1][j] = self.field[i1 - 1][j]
+                    if i1 == 0:
+                        for j in range(self.width):
+                            self.field[i1][j] = 0
+                        continue
+        gainedscore, attack =0,0
         if lines > 0:
             self.cleared_lines += lines
-            self.calculate_score(lines, t_field)
+            gainedscore, attack = self.calculate_score(lines, t_field)
             self.just_rotate = False
-    def micro_scores(self, drop_height):
-            self.score += drop_height / 16
-            self.score += -(self.bumpiness() - self.actual_bumpiness) / 16
-            self.score += -(self.total_height() - self.actual_total_height) / 8
-            self.score += -(self.holes() - self.actual_holes) / 4
-            self.actual_bumpiness = self.bumpiness()
-            self.actual_total_height = self.total_height()
-            self.actual_holes = self.holes()
+        return gainedscore, attack
+            
+    #def micro_scores(self, drop_height):
+    #        self.score += drop_height / 16
+    #        self.score += -(self.bumpiness() - self.actual_bumpiness) / 16
+    #        self.score += -(self.total_height() - self.actual_total_height) / 8
+    #        self.score += -(self.holes() - self.actual_holes) / 4
+    #        self.actual_bumpiness = self.bumpiness()
+    #        self.actual_total_height = self.total_height()
+    #        self.actual_holes = self.holes()
             
     def drop(self):
         while not self.intersects():
             self.figure.y += 1
         self.figure.y -= 1
         drop_height = self.figure.y
-        self.freeze()
-        self.micro_scores(drop_height)
-        return drop_height
+        gained_score, attack = self.freeze()
+        #self.micro_scores(drop_height)
+        return drop_height, gained_score, attack
 
     def go_down(self):
         self.figure.y += 1
@@ -185,7 +215,7 @@ class Tetris:
             for j in range(len(self.figure.image())):
                 if self.figure.image()[i][j] != 0:
                     self.field[i + self.figure.y][j + self.figure.x] = self.figure.color
-        self.break_lines(t_field)
+        gained_score, attack = self.break_lines(t_field)
         self.new_figure()
         if self.intersects():
             self.state = "gameover"
@@ -193,6 +223,7 @@ class Tetris:
         self.limit_no_freeze = 20
         self.update_queue()
         self.hold_avaible = True
+        return gained_score, attack
 
     def go_side(self, dx):
         old_x = self.figure.x

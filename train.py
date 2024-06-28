@@ -3,17 +3,17 @@ from tetrisEnv import TetrisEnv
 from helper import plot
 import torch
 metrics = {
-    "drop": 3,
-    "height": 16,
-    "bumpiness": 16,
-    "total_height": 7,
-    "holes": 18
+    "drop": 2,
+    "height": 8,
+    "bumpiness": 13,
+    "total_height": 14,
+    "holes": 15
 }
 env = TetrisEnv(metrics=metrics,render_mode="human")
 
-agent = TetrisAgent(gamma=0.921, learning_rate=2.5e-5)
-agent.model.load_state_dict(torch.load("models/tetris_dqn3_IOpieces1806.h5",map_location=agent.model.device))
-agent.target_model.load_state_dict(torch.load("models/tetris_dqn3_IOpieces1806.h5",map_location=agent.model.device))
+agent = TetrisAgent(gamma=0.995, learning_rate=2.5e-5, ref_data = True)
+agent.model.load_state_dict(torch.load("models/tetris_dqn3_IOpieces2306.h5",map_location=agent.model.device))
+agent.target_model.load_state_dict(torch.load("models/tetris_dqn3_IOpieces2306.h5",map_location=agent.model.device))
 num_episodes = 300_000
 plot_scores = []
 plot_mean_scores = []
@@ -42,7 +42,7 @@ for episode in range(1,num_episodes):
             break
         if score > record:
             record = score
-            agent.save("models/tetris_dqn3_IOpieces1906_1.h5")
+            agent.save("models/tetris_dqn3_IOpieces2406_1.h5")
     agent.replay()
     print('Game', episode, "\nScore", score, '\nRecord: ', record, '\nEpsion: ', agent.epsilon)
     if episode % agent.update_target == 0:

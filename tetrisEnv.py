@@ -48,6 +48,7 @@ class TetrisEnv(gymnasium.Env):
         self.actual_bumpiness = self.game.bumpiness()
         self.actual_total_height = self.game.total_height()
         self.actual_holes = self.game.holes()
+        self.attack = 0
         self.observation_space = spaces.Dict(
             {
                 "x_piece":spaces.Discrete(self.width,start=-2),
@@ -147,24 +148,24 @@ class TetrisEnv(gymnasium.Env):
         elif self._action_to_direction[idx_action] == 'hold':
             self.game.hold()
         elif self._action_to_direction[idx_action] == 'drop':
-            drop_height = self.game.drop()
+            drop_height, _,self.attack = self.game.drop()
             self.moves_without_drop = 0
 
         terminated = self.game.state == "gameover"
         if terminated:
             self.moves_without_drop =0
-            self.game.score -= 12
+            self.game.score -= 400
         
         #autodrop
         if self._action_to_direction[idx_action] != 'drop':
             self.moves_without_drop += 1
         if self.moves_without_drop >= 30:
             self.game.drop()
-            self.game.score -= 5
+            print("no hace nada")
+            self.game.score -= 1000
             self.moves_without_drop =0
             
         #score / reward
-            
         if self._action_to_direction[idx_action] == 'drop':
             self.game.score += self.metrics['drop']
             self.game.score += drop_height / self.metrics['height']
@@ -176,8 +177,7 @@ class TetrisEnv(gymnasium.Env):
             self.actual_holes = self.game.holes()
             
             
-        if self.game.score > 20000:
-            self.game.score +=500
+        if self.game.score > 200000:
             terminated = True
 
         if self.game.score != self.actualscore:
